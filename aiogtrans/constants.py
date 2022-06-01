@@ -321,7 +321,9 @@ LANGUAGES = {
 }
 
 LANGCODES = dict(map(reversed, LANGUAGES.items()))
+
 DEFAULT_RAISE_EXCEPTION = False
+
 DUMMY_DATA = [
     [["", None, None, 0]],
     None,
