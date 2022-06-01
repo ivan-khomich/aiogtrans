@@ -12,8 +12,8 @@ import typing
 import httpx
 from httpx import Timeout
 
-from aiogtrans import urls, utils
-from aiogtrans.gtoken import TokenAcquirer
+from aiogtrans import urls
+from aiogtrans.gtoken import TokenGenerator
 from aiogtrans.constants import (
     DEFAULT_CLIENT_SERVICE_URLS,
     DEFAULT_FALLBACK_SERVICE_URLS,
@@ -98,10 +98,9 @@ class Translator:
             self.service_urls = DEFAULT_FALLBACK_SERVICE_URLS
             self.client_type = "gtx"
         else:
-            # default way of working: use the defined values from user app
             self.service_urls = service_urls
             self.client_type = "tw-ob"
-            self.token_acquirer = TokenAcquirer(
+            self.token_generator = TokenGenerator(
                 client=self.client, host=self.service_urls[0]
             )
 

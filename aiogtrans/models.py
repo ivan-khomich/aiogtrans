@@ -3,19 +3,25 @@ from typing import List
 
 
 class Base:
+    """
+    Base class for response objects such as Translated and Detected
+    """
+
     def __init__(self, response: Response = None):
         self._response = response
 
 
 class TranslatedPart:
-    def __init__(self, text: str, candidates: List[str]):
+    """Translated parts"""
+
+    def __init__(self, text: str, candidates: List[str]) -> None:
         self.text = text
         self.candidates = candidates
 
-    def __str__(self):
+    def __str__(self) -> str:
         return self.text
 
-    def __dict__(self):
+    def __dict__(self) -> dict:
         return {
             "text": self.text,
             "candidates": self.candidates,
@@ -52,10 +58,10 @@ class Translated(Base):
         self.parts = parts
         self.extra_data = extra_data
 
-    def __str__(self):  # pragma: nocover
+    def __str__(self):
         return self.__unicode__()
 
-    def __unicode__(self):  # pragma: nocover
+    def __unicode__(self):
         return (
             "Translated(src={src}, dest={dest}, text={text}, pronunciation={pronunciation}, "
             "extra_data={extra_data})".format(
@@ -91,10 +97,10 @@ class Detected(Base):
         self.lang = lang
         self.confidence = confidence
 
-    def __str__(self):  # pragma: nocover
+    def __str__(self):
         return self.__unicode__()
 
-    def __unicode__(self):  # pragma: nocover
+    def __unicode__(self):
         return "Detected(lang={lang}, confidence={confidence})".format(
             lang=self.lang, confidence=self.confidence
         )

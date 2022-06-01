@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import ast
+import asyncio
 import math
 import re
 import time
@@ -9,7 +10,7 @@ import httpx
 from aiogtrans.utils import rshift
 
 
-class TokenAcquirer:
+class TokenGenerator:
     """Google Translate API token generator
 
     translate.google.com uses a token to authorize the requests. If you are
@@ -38,7 +39,9 @@ class TokenAcquirer:
     RE_TKK = re.compile(r"tkk:\'(.+?)\'", re.DOTALL)
     RE_RAWTKK = re.compile(r"tkk:\'(.+?)\'", re.DOTALL)
 
-    def __init__(self, client: httpx.AsyncClient, tkk="0", host="translate.google.com"):
+    def __init__(self, loop: asyncio.AbstractEventLoop, client: httpx.AsyncClient, tkk: str = "0", host: str = "translate.google.com") -> None:
+        """Initiation for the token generator"""
+        self.loop = loop
         self.client = client
         self.tkk = tkk
         self.host = host if "http" in host else "https://" + host
@@ -49,12 +52,14 @@ class TokenAcquirer:
         """
         # we don't need to update the base TKK value when it is still valid
         now = math.floor(int(time.time() * 1000) / 3600000.0)
+    
         if self.tkk and int(self.tkk.split(".")[0]) == now:
             return
 
-        r = self.client.get(self.host)
+        r = await self.client.get(self.host)
 
         raw_tkk = self.RE_TKK.search(r.text)
+    
         if raw_tkk:
             self.tkk = raw_tkk.group(1)
             return
@@ -64,10 +69,12 @@ class TokenAcquirer:
             code = self.RE_TKK.search(r.text).group(1).replace("var ", "")
             # unescape special ascii characters such like a \x3d(=)
             code = code.encode().decode("unicode-escape")
+
         except AttributeError:
             raise Exception(
                 "Could not find TKK token for this request.\nSee https://github.com/ssut/py-googletrans/issues/234 for more details."
             )
+
         except:
             raise
 
@@ -114,25 +121,8 @@ class TokenAcquirer:
 
             self.tkk = result
 
-    async def _lazy(self, value):
-        """like lazy evaluation, this method returns a lambda function that
-        returns value given.
-        We won't be needing this because this seems to have been built for
-        code obfuscation.
-
-        the original code of this method is as follows:
-
-           ... code-block: javascript
-
-               var ek = function(a) {
-                return function() {
-                    return a;
-                };
-               }
-        """
-        return lambda: value
-
     async def _xr(self, a, b):
+        """Math for generating the token"""
         size_b = len(b)
         c = 0
         while c < size_b - 2:
@@ -144,15 +134,14 @@ class TokenAcquirer:
             c += 3
         return a
 
-    async def acquire(self, text):
+    async def generate(self, text: str) -> str:
         a = []
-        # Convert text to ints
+
         for i in text:
             val = ord(i)
             if val < 0x10000:
                 a += [val]
             else:
-                # Python doesn't natively use Unicode surrogates, so account for those
                 a += [
                     math.floor((val - 0x10000) / 0x400 + 0xD800),
                     math.floor((val - 0x10000) % 0x400 + 0xDC00),
@@ -162,21 +151,17 @@ class TokenAcquirer:
         d = b.split(".")
         b = int(d[0]) if len(d) > 1 else 0
 
-        # assume e means char code array
         e = []
         g = 0
         size = len(a)
         while g < size:
             l = a[g]
-            # just append if l is less than 128(ascii: DEL)
             if l < 128:
                 e.append(l)
-            # append calculated value if l is less than 2048
             else:
                 if l < 2048:
                     e.append(l >> 6 | 192)
                 else:
-                    # append calculated value if l matches special condition
                     if (
                         (l & 64512) == 55296
                         and g + 1 < size
@@ -185,7 +170,7 @@ class TokenAcquirer:
                         g += 1
                         l = (
                             65536 + ((l & 1023) << 10) + (a[g] & 1023)
-                        )  # This bracket is important
+                        )
                         e.append(l >> 18 | 240)
                         e.append(l >> 12 & 63 | 128)
                     else:
@@ -199,13 +184,14 @@ class TokenAcquirer:
             a = await self._xr(a, "+-a^+6")
         a = await self._xr(a, "+-3^+b+-f")
         a ^= int(d[1]) if len(d) > 1 else 0
-        if a < 0:  # pragma: nocover
+        if a < 0:
             a = (a & 2147483647) + 2147483648
-        a %= 1000000  # int(1E6)
+        a %= 1000000
 
-        return "{}.{}".format(a, a ^ b)
+        token = f"{a}.{a ^ b}"
+        return token
 
     async def do(self, text):
         await self._update()
-        tk = await self.acquire(text)
-        return tk
+        token = await self.generate(text)
+        return token
