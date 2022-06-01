@@ -16,9 +16,7 @@ def get_file(*paths):
 
 
 def get_version():
-    init_py = get_file(os.path.dirname(__file__), "aiogtrans", "__init__.py")
-    pattern = r"{0}\W*=\W*'([^']+)'".format("__version__")
-    (version,) = re.findall(pattern, init_py)
+    version = "1.0.1"
     return version
 
 
