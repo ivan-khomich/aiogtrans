@@ -100,9 +100,9 @@ class Translator:
         else:
             self.service_urls = service_urls
             self.client_type = "tw-ob"
-            self.token_generator = TokenGenerator(
-                client=self.client, host=self.service_urls[0]
-            )
+            #self.token_generator = TokenGenerator(
+                #client=self.client, host=self.service_urls[0]
+            #)
 
         self.raise_exception = raise_exception
 
