@@ -17,9 +17,10 @@ class TranslatedPart:
 
     def __dict__(self):
         return {
-            'text': self.text,
-            'candidates': self.candidates,
+            "text": self.text,
+            "candidates": self.candidates,
         }
+
 
 class Translated(Base):
     """Translate result object
@@ -31,8 +32,17 @@ class Translated(Base):
     :param pronunciation: pronunciation
     """
 
-    def __init__(self, src, dest, origin, text, pronunciation, parts: List[TranslatedPart],
-                extra_data=None, **kwargs):
+    def __init__(
+        self,
+        src,
+        dest,
+        origin,
+        text,
+        pronunciation,
+        parts: List[TranslatedPart],
+        extra_data=None,
+        **kwargs
+    ):
         super().__init__(**kwargs)
         self.src = src
         self.dest = dest
@@ -47,24 +57,27 @@ class Translated(Base):
 
     def __unicode__(self):  # pragma: nocover
         return (
-            u'Translated(src={src}, dest={dest}, text={text}, pronunciation={pronunciation}, '
-            u'extra_data={extra_data})'.format(
-                src=self.src, dest=self.dest, text=self.text,
+            "Translated(src={src}, dest={dest}, text={text}, pronunciation={pronunciation}, "
+            "extra_data={extra_data})".format(
+                src=self.src,
+                dest=self.dest,
+                text=self.text,
                 pronunciation=self.pronunciation,
-                extra_data='"' + repr(self.extra_data)[:10] + '..."'
+                extra_data='"' + repr(self.extra_data)[:10] + '..."',
             )
         )
 
     def __dict__(self):
         return {
-            'src': self.src,
-            'dest': self.dest,
-            'origin': self.origin,
-            'text': self.text,
-            'pronunciation': self.pronunciation,
-            'extra_data': self.extra_data,
-            'parts': list(map(lambda part: part.__dict__(), self.parts)),
+            "src": self.src,
+            "dest": self.dest,
+            "origin": self.origin,
+            "text": self.text,
+            "pronunciation": self.pronunciation,
+            "extra_data": self.extra_data,
+            "parts": list(map(lambda part: part.__dict__(), self.parts)),
         }
+
 
 class Detected(Base):
     """Language detection result object
@@ -82,5 +95,6 @@ class Detected(Base):
         return self.__unicode__()
 
     def __unicode__(self):  # pragma: nocover
-        return u'Detected(lang={lang}, confidence={confidence})'.format(
-            lang=self.lang, confidence=self.confidence)
+        return "Detected(lang={lang}, confidence={confidence})".format(
+            lang=self.lang, confidence=self.confidence
+        )
