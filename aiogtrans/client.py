@@ -68,10 +68,10 @@ class Translator:
     def __init__(
         self,
         loop: asyncio.AbstractEventLoop = asyncio.get_event_loop(),
-        service_urls: typing.Union(list, tuple) = DEFAULT_CLIENT_SERVICE_URLS,
+        service_urls: typing.Union[list, tuple] = DEFAULT_CLIENT_SERVICE_URLS,
         user_agent: str = DEFAULT_USER_AGENT,
         raise_exception: bool = DEFAULT_RAISE_EXCEPTION,
-        proxies: typing.Union(str, dict) = None,
+        proxies: typing.Union[str, dict] = None,
         timeout: Timeout = None,
         http2: bool = True,
         use_fallback: bool = False,
