@@ -10,15 +10,15 @@ import json
 import httpx
 from httpx import Timeout
 
-from asyncgoogletrans import urls, utils
-from asyncgoogletrans.gtoken import TokenAcquirer
-from asyncgoogletrans.constants import (
+from aiogtrans import urls, utils
+from aiogtrans.gtoken import TokenAcquirer
+from aiogtrans.constants import (
     DEFAULT_CLIENT_SERVICE_URLS,
     DEFAULT_FALLBACK_SERVICE_URLS,
     DEFAULT_USER_AGENT, LANGCODES, LANGUAGES, SPECIAL_CASES,
     DEFAULT_RAISE_EXCEPTION, DUMMY_DATA
 )
-from asyncgoogletrans.models import Translated, Detected, TranslatedPart
+from aiogtrans.models import Translated, Detected, TranslatedPart
 
 EXCLUDES = ('en', 'ca', 'fr')
 

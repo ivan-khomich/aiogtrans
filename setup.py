@@ -16,14 +16,14 @@ def get_file(*paths):
 
 
 def get_version():
-    init_py = get_file(os.path.dirname(__file__), 'asyncgoogletrans', '__init__.py')
+    init_py = get_file(os.path.dirname(__file__), 'aiogtrans', '__init__.py')
     pattern = r"{0}\W*=\W*'([^']+)'".format('__version__')
     version, = re.findall(pattern, init_py)
     return version
 
 
 def get_description():
-    init_py = get_file(os.path.dirname(__file__), 'asyncgoogletrans', '__init__.py')
+    init_py = get_file(os.path.dirname(__file__), 'aiogtrans', '__init__.py')
     pattern = r'"""(.*?)"""'
     description, = re.findall(pattern, init_py, re.DOTALL)
     return description
@@ -41,14 +41,14 @@ def get_requirements():
 
 def install():
     setup(
-        name='asyncgoogletrans',
+        name='aiogtrans',
         version=get_version(),
         description=get_description(),
         long_description=get_readme(),
         license='MIT',
         author='Ben Z',
         author_email='bleg3ndary@gmail.com',
-        url='https://github.com/Leg3ndary/asyncgoogletrans',
+        url='https://github.com/Leg3ndary/aiogtrans',
         classifiers=[
             'Development Status :: 5 - Production/Stable',
             'Intended Audience :: Education',

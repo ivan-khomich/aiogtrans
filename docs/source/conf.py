@@ -17,7 +17,7 @@
 
 # -- Project information -----------------------------------------------------
 
-project = 'asyncgoogletrans'
+project = 'aiogtrans'
 copyright = '2022, Ben Z'
 author = 'Ben Z'
 

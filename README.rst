@@ -1,12 +1,12 @@
-asyncgoogletrans
+aiogtrans
 ==============
 
-asyncgoogletrans is a **free** and **unlimited** python library that implements the Google Translate API asynchronously. This uses the `Google Translate Ajax
+aiogtrans is a **free** and **unlimited** python library that implements the Google Translate API asynchronously. This uses the `Google Translate Ajax
 API <https://translate.google.com>`__ and `httpx <https://www.python-httpx.org>`__ to make api calls.
 
 Compatible with Python 3.6+.
 
-For details refer to the `API Documentation <https://asyncgoogletrans.readthedocs.io/en/latest>`__.
+For details refer to the `API Documentation <https://aiogtrans.readthedocs.io/en/latest>`__.
 
 Features
 --------
@@ -55,13 +55,13 @@ I have decided to move on and update this project.
 Installation
 ------------
 
-To install, either use things like pip with the package "asyncgoogletrans"
+To install, either use things like pip with the package "aiogtrans"
 or download the package and put the "googletrans" directory into your
 python path.
 
 .. code:: bash
 
-    $ pip install asyncgoogletrans
+    $ pip install aiogtrans
 
 Basic Usage
 -----------
@@ -71,7 +71,7 @@ source language.
 
 .. code:: python
 
-    >>> from asyncgoogletrans import Translator
+    >>> from aiogtrans import Translator
     >>> translator = Translator()
     >>> await translator.translate('안녕하세요.')
     # <Translated src=ko dest=en text=Good evening. pronunciation=Good evening.>
@@ -129,7 +129,7 @@ a given sentence.
     >>> await translator.detect('Tiu frazo estas skribita en Esperanto.')
     # <Detected lang=eo confidence=0.10538048>
 
-asyncgoogletrans as a command line application
+aiogtrans as a command line application
 -----------------------------------------
 
 .. code:: bash
@@ -188,7 +188,7 @@ Of course you're more then welcome to fork this and make your own changes
 License
 -------
 
-asyncgoogletrans is licensed under the MIT License. The terms are as
+aiogtrans is licensed under the MIT License. The terms are as
 follows:
 
 ::
