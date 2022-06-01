@@ -114,7 +114,7 @@ class Translator:
             'soc-device': 1,
             'rt': 'c',
         }
-        r = self.client.post(url, params=params, data=data)
+        r = await self.client.post(url, params=params, data=data)
 
         if r.status_code != 200 and self.raise_Exception:
             raise Exception('Unexpected status code "{}" from {}'.format(
