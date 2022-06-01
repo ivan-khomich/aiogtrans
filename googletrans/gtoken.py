@@ -38,12 +38,12 @@ class TokenAcquirer:
     RE_TKK = re.compile(r'tkk:\'(.+?)\'', re.DOTALL)
     RE_RAWTKK = re.compile(r'tkk:\'(.+?)\'', re.DOTALL)
 
-    def __init__(self, client: httpx.Client, tkk='0', host='translate.google.com'):
+    def __init__(self, client: httpx.AsyncClient, tkk='0', host='translate.google.com'):
         self.client = client
         self.tkk = tkk
         self.host = host if 'http' in host else 'https://' + host
 
-    def _update(self):
+    async def _update(self):
         """update tkk
         """
         # we don't need to update the base TKK value when it is still valid
@@ -122,7 +122,7 @@ class TokenAcquirer:
         """
         return lambda: value
 
-    def _xr(self, a, b):
+    async def _xr(self, a, b):
         size_b = len(b)
         c = 0
         while c < size_b - 2:
@@ -134,7 +134,7 @@ class TokenAcquirer:
             c += 3
         return a
 
-    def acquire(self, text):
+    async def acquire(self, text):
         a = []
         # Convert text to ints
         for i in text:
@@ -181,8 +181,8 @@ class TokenAcquirer:
         a = b
         for i, value in enumerate(e):
             a += value
-            a = self._xr(a, '+-a^+6')
-        a = self._xr(a, '+-3^+b+-f')
+            a = await self._xr(a, '+-a^+6')
+        a = await self._xr(a, '+-3^+b+-f')
         a ^= int(d[1]) if len(d) > 1 else 0
         if a < 0:  # pragma: nocover
             a = (a & 2147483647) + 2147483648
@@ -190,7 +190,7 @@ class TokenAcquirer:
 
         return '{}.{}'.format(a, a ^ b)
 
-    def do(self, text):
-        self._update()
-        tk = self.acquire(text)
+    async def do(self, text):
+        await self._update()
+        tk = await self.acquire(text)
         return tk

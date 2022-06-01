@@ -5,9 +5,7 @@ A Translation module.
 You can translate text using this module.
 """
 import random
-import typing
 
-import httpcore
 import httpx
 from httpx import Timeout
 
@@ -51,11 +49,11 @@ class Translator:
 
     def __init__(self, service_urls=None, user_agent=DEFAULT_USER_AGENT,
                  raise_exception=DEFAULT_RAISE_EXCEPTION,
-                 proxies: typing.Dict[str, httpcore.SyncHTTPTransport] = None,
+                 proxies = None,
                  timeout: Timeout = None,
                  http2=True):
 
-        self.client = httpx.Client(http2=http2)
+        self.client = httpx.AsyncClient(http2=http2)
         if proxies is not None:  # pragma: nocover
             self.client.proxies = proxies
 
@@ -71,21 +69,21 @@ class Translator:
             client=self.client, host=self.service_urls[0])
         self.raise_exception = raise_exception
 
-    def _pick_service_url(self):
+    async def _pick_service_url(self):
         if len(self.service_urls) == 1:
             return self.service_urls[0]
         return random.choice(self.service_urls)
 
-    def _translate(self, text, dest, src, override):
-        token = self.token_acquirer.do(text)
-        params = utils.build_params(query=text, src=src, dest=dest,
+    async def _translate(self, text, dest, src, override):
+        token = await self.token_acquirer.do(text)
+        params = await utils.build_params(query=text, src=src, dest=dest,
                                     token=token, override=override)
 
-        url = urls.TRANSLATE.format(host=self._pick_service_url())
-        r = self.client.get(url, params=params)
+        url = urls.TRANSLATE.format(host=await self._pick_service_url())
+        r = await self.client.get(url, params=params)
 
         if r.status_code == 200:
-            data = utils.format_json(r.text)
+            data = await utils.format_json(r.text)
             return data, r
 
         if self.raise_exception:
@@ -95,7 +93,7 @@ class Translator:
         DUMMY_DATA[0][0][0] = text
         return DUMMY_DATA, r
 
-    def _parse_extra_data(self, data):
+    async def _parse_extra_data(self, data):
         response_parts_name_mapping = {
             0: 'translation',
             1: 'all-translations',
@@ -118,7 +116,7 @@ class Translator:
 
         return extra
 
-    def translate(self, text, dest='en', src='auto', **kwargs):
+    async def translate(self, text, dest='en', src='auto', **kwargs) -> Translated:
         """Translate text from source language to destination language
 
         :param text: The source text(s) to be translated. Batch translation is supported via sequence input.
@@ -142,11 +140,11 @@ class Translator:
         Basic usage:
             >>> from googletrans import Translator
             >>> translator = Translator()
-            >>> translator.translate('안녕하세요.')
+            >>> await translator.translate('안녕하세요.')
             <Translated src=ko dest=en text=Good evening. pronunciation=Good evening.>
-            >>> translator.translate('안녕하세요.', dest='ja')
+            >>> await translator.translate('안녕하세요.', dest='ja')
             <Translated src=ko dest=ja text=こんにちは。 pronunciation=Kon'nichiwa.>
-            >>> translator.translate('veritas lux mea', src='la')
+            >>> await translator.translate('veritas lux mea', src='la')
             <Translated src=la dest=en text=The truth is my light pronunciation=The truth is my light>
 
         Advanced usage:
@@ -179,17 +177,17 @@ class Translator:
         if isinstance(text, list):
             result = []
             for item in text:
-                translated = self.translate(item, dest=dest, src=src, **kwargs)
+                translated = await self.translate(item, dest=dest, src=src, **kwargs)
                 result.append(translated)
             return result
 
         origin = text
-        data, response = self._translate(text, dest, src, kwargs)
+        data, response = await self._translate(text, dest, src, kwargs)
 
         # this code will be updated when the format is changed.
         translated = ''.join([d[0] if d[0] else '' for d in data[0]])
 
-        extra_data = self._parse_extra_data(data)
+        extra_data = await self._parse_extra_data(data)
 
         # actual source language that will be recognized by Google Translator when the
         # src passed is equal to auto.
@@ -221,7 +219,7 @@ class Translator:
 
         return result
 
-    def detect(self, text, **kwargs):
+    async def detect(self, text, **kwargs) -> Detected:
         """Detect language of the input text
 
         :param text: The source text(s) whose language you want to identify.
@@ -255,11 +253,11 @@ class Translator:
         if isinstance(text, list):
             result = []
             for item in text:
-                lang = self.detect(item)
+                lang = await self.detect(item)
                 result.append(lang)
             return result
 
-        data, response = self._translate(text, 'en', 'auto', kwargs)
+        data, response = await self._translate(text, 'en', 'auto', kwargs)
 
         # actual source language that will be recognized by Google Translator when the
         # src passed is equal to auto.

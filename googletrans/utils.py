@@ -3,7 +3,7 @@ import json
 import re
 
 
-def build_params(query, src, dest, token, override):
+async def build_params(query, src, dest, token, override):
     params = {
         'client': 'webapp',
         'sl': src,
@@ -26,7 +26,7 @@ def build_params(query, src, dest, token, override):
     return params
 
 
-def legacy_format_json(original):
+async def legacy_format_json(original):
     # save state
     states = []
     text = original
@@ -64,11 +64,11 @@ def get_items(dict_object):
         yield key, dict_object[key]
 
 
-def format_json(original):
+async def format_json(original):
     try:
         converted = json.loads(original)
     except ValueError:
-        converted = legacy_format_json(original)
+        converted = await legacy_format_json(original)
 
     return converted
 
