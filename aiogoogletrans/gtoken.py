@@ -6,7 +6,7 @@ import time
 
 import httpx
 
-from aiogoogletrans.utils import rshift
+from asyncgoogletrans.utils import rshift
 
 
 class TokenAcquirer:

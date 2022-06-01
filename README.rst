@@ -1,12 +1,12 @@
-aiogoogletrans
+asyncgoogletrans
 ==============
 
-aiogoogletrans is a **free** and **unlimited** python library that implements the Google Translate API asynchronously. This uses the `Google Translate Ajax
+asyncgoogletrans is a **free** and **unlimited** python library that implements the Google Translate API asynchronously. This uses the `Google Translate Ajax
 API <https://translate.google.com>`__ and `httpx <https://www.python-httpx.org>`__ to make api calls.
 
 Compatible with Python 3.6+.
 
-For details refer to the `API Documentation <https://aiogoogletrans.readthedocs.io/en/latest>`__.
+For details refer to the `API Documentation <https://asyncgoogletrans.readthedocs.io/en/latest>`__.
 
 Features
 --------
@@ -55,13 +55,13 @@ I have decided to move on and update this project.
 Installation
 ------------
 
-To install, either use things like pip with the package "aiogoogletrans"
+To install, either use things like pip with the package "asyncgoogletrans"
 or download the package and put the "googletrans" directory into your
 python path.
 
 .. code:: bash
 
-    $ pip install aiogoogletrans
+    $ pip install asyncgoogletrans
 
 Basic Usage
 -----------
@@ -71,7 +71,7 @@ source language.
 
 .. code:: python
 
-    >>> from aiogoogletrans import Translator
+    >>> from asyncgoogletrans import Translator
     >>> translator = Translator()
     >>> await translator.translate('안녕하세요.')
     # <Translated src=ko dest=en text=Good evening. pronunciation=Good evening.>
@@ -129,7 +129,7 @@ a given sentence.
     >>> await translator.detect('Tiu frazo estas skribita en Esperanto.')
     # <Detected lang=eo confidence=0.10538048>
 
-AiogoogleTrans as a command line application
+asyncgoogletrans as a command line application
 -----------------------------------------
 
 .. code:: bash
@@ -188,7 +188,7 @@ Of course you're more then welcome to fork this and make your own changes
 License
 -------
 
-aiogoogletrans is licensed under the MIT License. The terms are as
+asyncgoogletrans is licensed under the MIT License. The terms are as
 follows:
 
 ::
