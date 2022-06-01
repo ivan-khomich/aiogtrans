@@ -23,18 +23,16 @@ def get_version():
 
 
 def get_description():
-    init_py = get_file(os.path.dirname(__file__), 'aiogtrans', '__init__.py')
-    pattern = r'"""(.*?)"""'
-    description, = re.findall(pattern, init_py, re.DOTALL)
+    description = """An async and updated version of the googletrans package."""
     return description
 
 
 def get_readme():
-    return get_file(os.path.dirname(__file__), 'README.rst')
+    return get_file(os.path.dirname(__file__), 'README.md')
 
 def get_requirements():
     requirements = []
-    with open("requirements.txt") as f:
+    with open("requirements.txt", "r") as f:
         requirements = f.read().splitlines()
     return requirements
 
@@ -45,6 +43,7 @@ def install():
         version=get_version(),
         description=get_description(),
         long_description=get_readme(),
+        long_description_content_type="text/markdown",
         license='MIT',
         author='Ben Z',
         author_email='bleg3ndary@gmail.com',
