@@ -51,7 +51,7 @@ class TokenAcquirer:
         if self.tkk and int(self.tkk.split('.')[0]) == now:
             return
 
-        r = self.client.get(self.host)
+        r = await self.client.get(self.host)
 
         raw_tkk = self.RE_TKK.search(r.text)
         if raw_tkk:
