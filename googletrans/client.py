@@ -127,14 +127,14 @@ class Translator:
         if self.client_type == 'webapp':
             token = await self.token_acquirer.do(text)
 
-        params = utils.build_params(client=self.client_type, query=text, src=src, dest=dest,
+        params = await utils.build_params(client=self.client_type, query=text, src=src, dest=dest,
                                     token=token, override=override)
 
         url = urls.TRANSLATE.format(host=await self._pick_service_url())
         r = await self.client.get(url, params=params)
 
         if r.status_code == 200:
-            data = utils.format_json(r.text)
+            data = await utils.format_json(r.text)
             return data, r
 
         if self.raise_exception:
