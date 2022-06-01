@@ -1,6 +1,8 @@
 Googletrans
 ===========
 
+I'm not gonna document this, this is just stuff I think needs to be done
+
 |GitHub license| |travis status| |Documentation Status| |PyPI version|
 |Coverage Status| |Code Climate|
 

@@ -40,9 +40,9 @@ def install():
         description=get_description(),
         long_description=get_readme(),
         license='MIT',
-        author='SuHun Han',
-        author_email='ssut' '@' 'ssut.me',
-        url='https://github.com/ssut/py-googletrans',
+        author='Ben Z',
+        author_email='none@gmail.com',
+        url='https://github.com/Leg3ndary/googletrans',
         classifiers=['Development Status :: 5 - Production/Stable',
                      'Intended Audience :: Education',
                      'Intended Audience :: End Users/Desktop',
@@ -58,14 +58,9 @@ def install():
         packages=find_packages(exclude=['docs', 'tests']),
         keywords='google translate translator',
         install_requires=[
-            'httpx==0.13.3',
+            'httpx==0.24.3',
         ],
         python_requires= '>=3.6',
-        tests_require=[
-            'pytest',
-            'coveralls',
-        ],
-        scripts=['translate']
     )
 
 
