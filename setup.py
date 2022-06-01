@@ -32,6 +32,12 @@ def get_description():
 def get_readme():
     return get_file(os.path.dirname(__file__), 'README.rst')
 
+def get_requirements():
+    requirements = []
+    with open("requirements.txt") as f:
+        requirements = f.read().splitlines()
+    return requirements
+
 
 def install():
     setup(
@@ -43,23 +49,22 @@ def install():
         author='Ben Z',
         author_email='none@gmail.com',
         url='https://github.com/Leg3ndary/googletrans',
-        classifiers=['Development Status :: 5 - Production/Stable',
-                     'Intended Audience :: Education',
-                     'Intended Audience :: End Users/Desktop',
-                     'License :: Freeware',
-                     'Operating System :: POSIX',
-                     'Operating System :: Microsoft :: Windows',
-                     'Operating System :: MacOS :: MacOS X',
-                     'Topic :: Education',
-                     'Programming Language :: Python',
-                     'Programming Language :: Python :: 3.6',
-                     'Programming Language :: Python :: 3.7',
-                     'Programming Language :: Python :: 3.8'],
+        classifiers=[
+            'Development Status :: 5 - Production/Stable',
+            'Intended Audience :: Education',
+            'Intended Audience :: End Users/Desktop',
+            'License :: Freeware',
+            'Operating System :: POSIX',
+            'Operating System :: Microsoft :: Windows',
+            'Operating System :: MacOS :: MacOS X',
+            'Topic :: Education',
+            'Programming Language :: Python',
+            'Programming Language :: Python :: 3.6',
+            'Programming Language :: Python :: 3.7',
+            'Programming Language :: Python :: 3.8'],
         packages=find_packages(exclude=['docs', 'tests']),
         keywords='google translate translator',
-        install_requires=[
-            'httpx==0.23',
-        ],
+        install_requires=get_requirements(),
         python_requires= '>=3.6',
     )
 
