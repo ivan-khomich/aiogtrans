@@ -125,7 +125,7 @@ class Translator:
     async def _translate_legacy(self, text, dest, src, override):
         token = '' #dummy default value here as it is not used by api client
         if self.client_type == 'webapp':
-            token = self.token_acquirer.do(text)
+            token = await self.token_acquirer.do(text)
 
         params = utils.build_params(client=self.client_type, query=text, src=src, dest=dest,
                                     token=token, override=override)

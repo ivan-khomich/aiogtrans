@@ -52,17 +52,22 @@ class TokenAcquirer:
         if self.tkk and int(self.tkk.split('.')[0]) == now:
             return
 
-        r = await self.client.get(self.host)
+        r = self.client.get(self.host)
 
         raw_tkk = self.RE_TKK.search(r.text)
         if raw_tkk:
             self.tkk = raw_tkk.group(1)
             return
 
-        # this will be the same as python code after stripping out a reserved word 'var'
-        code = self.RE_TKK.search(r.text).group(1).replace('var ', '')
-        # unescape special ascii characters such like a \x3d(=)
-        code = code.encode().decode('unicode-escape')
+        try:
+            # this will be the same as python code after stripping out a reserved word 'var'
+            code = self.RE_TKK.search(r.text).group(1).replace('var ', '')
+            # unescape special ascii characters such like a \x3d(=)
+            code = code.encode().decode('unicode-escape')
+        except AttributeError:
+            raise Exception('Could not find TKK token for this request.\nSee https://github.com/ssut/py-googletrans/issues/234 for more details.')
+        except:
+            raise
 
         if code:
             tree = ast.parse(code)
@@ -105,7 +110,7 @@ class TokenAcquirer:
 
             self.tkk = result
 
-    def _lazy(self, value):
+    async def _lazy(self, value):
         """like lazy evaluation, this method returns a lambda function that
         returns value given.
         We won't be needing this because this seems to have been built for
