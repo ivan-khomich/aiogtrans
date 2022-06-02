@@ -15,7 +15,7 @@ def get_file(*paths):
 
 
 def get_version():
-    version = "1.1.0"
+    version = "1.1.1"
     return version
 
 
@@ -29,9 +29,10 @@ def get_readme():
 
 
 def get_requirements():
-    requirements = []
-    with open("requirements.txt", "r") as f:
-        requirements = f.read().splitlines()
+    requirements = [
+        "httpx==0.23.0"
+        "setuptools==58.1.0"
+    ]
     return requirements
 
 
