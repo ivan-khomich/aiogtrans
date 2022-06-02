@@ -40,11 +40,11 @@ class Translated(Base):
 
     def __init__(
         self,
-        src,
-        dest,
-        origin,
-        text,
-        pronunciation,
+        src: str,
+        dest: str,
+        origin: str,
+        text: str,
+        pronunciation: str,
         parts: List[TranslatedPart],
         extra_data=None,
         **kwargs
@@ -62,16 +62,7 @@ class Translated(Base):
         return self.__unicode__()
 
     def __unicode__(self):
-        return (
-            "Translated(src={src}, dest={dest}, text={text}, pronunciation={pronunciation}, "
-            "extra_data={extra_data})".format(
-                src=self.src,
-                dest=self.dest,
-                text=self.text,
-                pronunciation=self.pronunciation,
-                extra_data='"' + repr(self.extra_data)[:10] + '..."',
-            )
-        )
+        return f"Translated(src={self.src}, dest={self.dest}, text={self.text}, pronunciation={self.pronunciation}, extra_data={repr(self.extra_data)[:10]}...)"
 
     def __dict__(self):
         return {
@@ -92,7 +83,8 @@ class Detected(Base):
     :param confidence: the confidence of detection result (0.00 to 1.00)
     """
 
-    def __init__(self, lang, confidence, **kwargs):
+    def __init__(self, lang: str, confidence: float, **kwargs) -> None:
+        """Initiation for detected object"""
         super().__init__(**kwargs)
         self.lang = lang
         self.confidence = confidence
@@ -101,6 +93,4 @@ class Detected(Base):
         return self.__unicode__()
 
     def __unicode__(self):
-        return "Detected(lang={lang}, confidence={confidence})".format(
-            lang=self.lang, confidence=self.confidence
-        )
+        return f"Detected(lang={self.lang}, confidence={self.confidence})"

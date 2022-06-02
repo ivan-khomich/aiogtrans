@@ -10,12 +10,10 @@ import json
 import random
 import typing
 
-
 import httpx
 from httpx import Timeout
 
 from aiogtrans import urls
-from aiogtrans.gtoken import TokenGenerator
 from aiogtrans.constants import (
     DEFAULT_CLIENT_SERVICE_URLS,
     DEFAULT_FALLBACK_SERVICE_URLS,
@@ -23,8 +21,7 @@ from aiogtrans.constants import (
     LANGCODES,
     LANGUAGES,
     SPECIAL_CASES,
-    DEFAULT_RAISE_EXCEPTION,
-    DUMMY_DATA,
+    DEFAULT_RAISE_EXCEPTION
 )
 from aiogtrans.models import Translated, Detected, TranslatedPart
 
