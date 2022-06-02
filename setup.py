@@ -15,7 +15,7 @@ def get_file(*paths):
 
 
 def get_version():
-    version = "1.1.1.1"
+    version = "1.1.1.03"
     return version
 
 
@@ -30,7 +30,7 @@ def get_readme():
 
 def get_requirements():
     requirements = [
-        "httpx==0.23.0"
+        "httpx<=0.23.0"
         "setuptools==58.1.0"
     ]
     return requirements
