@@ -22,7 +22,7 @@ copies or substantial portions of the Software.
 __all__ = ("Translator",)
 
 # Client
-from aiogtrans.client import Translator
+from aiogtrans.httpxclient import Translator
 
 # Constants
 from aiogtrans.constants import LANGCODES, LANGUAGES
