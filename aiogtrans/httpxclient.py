@@ -2,7 +2,7 @@
 """
 A Translation module.
 
-You can translate text using this module.
+You can translate text using httpx in this module.
 """
 import asyncio
 import functools
@@ -30,7 +30,7 @@ EXCLUDES = ("en", "ca", "fr")
 RPC_ID = "MkEWBc"
 
 
-class Translator:
+class HttpXTranslator:
     """Google Translate Ajax API Translator class
 
     Create an instance of this class to access the API.
