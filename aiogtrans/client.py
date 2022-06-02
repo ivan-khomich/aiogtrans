@@ -5,9 +5,11 @@ A Translation module.
 You can translate text using this module.
 """
 import asyncio
-import random
+import functools
 import json
+import random
 import typing
+
 
 import httpx
 from httpx import Timeout
@@ -108,8 +110,8 @@ class Translator:
 
     async def _build_rpc_request(self, text: str, dest: str, src: str) -> str:
         """Build the rpc request"""
-        trans_info = await self.loop.run_in_executor(None, json.dumps, [[text, src, dest, True], [None]], separators=(",", ":"))
-        rpc = await self.loop.run_in_executor(None, json.dumps, [
+        trans_info = await self.loop.run_in_executor(None, functools.partial(json.dumps, obj=[[text, src, dest, True], [None]], separators=(",", ":")))
+        rpc = await self.loop.run_in_executor(None, functools.partial(json.dumps, obj=[
                 [
                     [
                         RPC_ID,
@@ -120,7 +122,7 @@ class Translator:
                 ]
             ],
             separators=(",", ":")
-        )
+        ))
         return rpc
 
     def _pick_service_url(self) -> str:
