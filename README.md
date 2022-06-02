@@ -65,7 +65,7 @@ If a source language is not given, google translate attempts to detect the sourc
 You can use another google translate domain for translation. If multiple URLs are provided, the program will randomly choose a domain.
 
 ```python
->>> from googletrans import Translator
+>>> from aiogtrans import Translator
 >>> translator = Translator(service_urls=[
         'translate.google.com',
         'translate.google.co.kr',
