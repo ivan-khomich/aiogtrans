@@ -156,8 +156,8 @@ class AiohttpTranslator:
             raise Exception(
                 f"""Unexpected status code "{r.status}" from {self.service_urls}"""
             )
-
-        return r.text, r
+        text = await r.text
+        return text, r
 
     async def _parse_extra_data(self, data: list) -> dict:
         """Parsing extra data to be returned to the user"""
