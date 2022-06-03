@@ -1,5 +1,6 @@
 from httpx import Response
-from typing import List
+from aiohttp import ClientResponse
+import typing
 
 
 class Base:
@@ -7,14 +8,17 @@ class Base:
     Base class for response objects such as Translated and Detected
     """
 
-    def __init__(self, response: Response = None):
+    def __init__(self, response: typing.Union[Response, ClientResponse] = None):
         self._response = response
 
 
 class TranslatedPart:
     """Translated parts"""
 
-    def __init__(self, text: str, candidates: List[str]) -> None:
+    def __init__(self, text: str, candidates: typing.List[str]) -> None:
+        """
+        Init for translated parts
+        """
         self.text = text
         self.candidates = candidates
 
@@ -45,7 +49,7 @@ class Translated(Base):
         origin: str,
         text: str,
         pronunciation: str,
-        parts: List[TranslatedPart],
+        parts: typing.List[TranslatedPart],
         extra_data=None,
         **kwargs
     ):
