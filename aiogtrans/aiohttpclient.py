@@ -152,9 +152,9 @@ class AiohttpTranslator:
         }
         r = await self.session.post(url, params=params, data=data)
 
-        if r.status_code != 200 and self.raise_Exception:
+        if r.status != 200 and self.raise_Exception:
             raise Exception(
-                f"""Unexpected status code "{r.status_code}" from {self.service_urls}"""
+                f"""Unexpected status code "{r.status}" from {self.service_urls}"""
             )
 
         return r.text, r
