@@ -15,7 +15,7 @@ def get_file(*paths):
 
 
 def get_version():
-    version = "1.1.3"
+    version = "1.1.4"
     return version
 
 
