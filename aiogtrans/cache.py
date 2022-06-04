@@ -1,6 +1,5 @@
-# -*- coding: utf-8 -*-
 """
-Predefined URLs used to make google translate requests.
+Cache related things go here
 
 Copyright (c) 2022 Ben Z
 
@@ -14,7 +13,3 @@ furnished to do so, subject to the following conditions:
 The above copyright notice and this permission notice shall be included in all
 copies or substantial portions of the Software.
 """
-
-BASE = "https://translate.google.com"
-TRANSLATE = "https://{host}/translate_a/single"
-TRANSLATE_RPC = "https://{host}/_/TranslateWebserverUi/data/batchexecute"
