@@ -1,4 +1,6 @@
 AiohttpTranslator
 =================
 
-.. automodule:: AiohttpTranslator
+.. automodule:: aiogtrans.AiohttpTranslator
+    
+    :members:
