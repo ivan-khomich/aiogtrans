@@ -1,4 +1,4 @@
 AiohttpTranslator
 =================
 
-something
+.. automodule:: AiohttpTranslator

@@ -42,7 +42,8 @@ RPC_ID = "MkEWBc"
 
 
 class AiohttpTranslator:
-    """Google Translate Ajax API Translator class
+    """
+    Google Translate Ajax API Translator class
 
     Create an instance of this class to access the API.
 
