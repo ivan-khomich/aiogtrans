@@ -19,7 +19,7 @@ The above copyright notice and this permission notice shall be included in all
 copies or substantial portions of the Software.
 """
 
-__all__ = ("HttpXTranslator", "AiohttpTranslator")
+__all__ = ("HttpXTranslator", "AiohttpTranslator", "LANGCODES", "LANGUAGES", "Translated", "Detected")
 
 # Client
 from aiogtrans.httpxclient import HttpXTranslator

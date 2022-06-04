@@ -25,8 +25,7 @@ class Cache:
     """
     
     def __init__(self, capacity: int = 1000) -> None:
-        """
-        Cache Init
+        """Cache Init
         
         Parameters
         ----------
@@ -34,24 +33,43 @@ class Cache:
             The amount of items to be stored in the cache
             Default 1,000
             
-        """
+        Returns
+        -------
+        None"""
         self.cache = OrderedDict()
         self.capacity = capacity
 
-    def get(self, key: int) -> typing.Union[Translated, Detected]:
-        """
-        Retrieve a key
-        """
+    def get(self, key: str) -> typing.Union[Translated, Detected]:
+        """Retrieve a key
+
+        Parameters
+        ----------
+        key: str
+            The key or translation keyword that will be queried
+
+        Returns
+        -------
+        Translated, Detected
+            The Translated or Detected cached object"""
         if key not in self.cache:
             return -1
         else:
             self.cache.move_to_end(key)
             return self.cache[key]
 
-    def add(self, key: int, value: int) -> None:
-        """
-        Add a key and value to the cache
-        """
+    def add(self, key: str, value: typing.Union[Translated, Detected]) -> None:
+        """Add a key and value to the cache
+        
+        Parameters
+        ----------
+        key: str
+            Keyword/words whatever
+        value: Translated, Detected
+            The object to store
+        
+        Returns
+        -------
+        None"""
         self.cache[key] = value
         self.cache.move_to_end(key)
         if len(self.cache) > self.capacity:
