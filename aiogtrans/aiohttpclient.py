@@ -46,34 +46,6 @@ class AiohttpTranslator:
     Google Translate Ajax API Translator class
 
     Create an instance of this class to access the API.
-
-    :param service_urls: google translate url list. URLs will be used randomly.
-        For example ``['translate.google.com', 'translate.google.co.kr']``
-        To preferably use the non webapp api, service url should be translate.googleapis.com
-    :type service_urls: a sequence of strings
-
-    :param user_agent: the User-Agent header to send when making requests.
-    :type user_agent: :class:`str`
-
-    :param proxies: proxies configuration.
-        Dictionary mapping protocol or protocol and host to the URL of the proxy
-        For example ``{'http': 'foo.bar:3128', 'http://host.name': 'foo.bar:4012'}``
-    :type proxies: dictionary
-
-    :param timeout: Definition of timeout for httpx library.
-                    Will be used for every request.
-    :type timeout: number or a double of numbers
-
-    :param proxies: proxies configuration.
-                    Dictionary mapping protocol or protocol and host to the URL of the proxy
-                    For example ``{'http': 'foo.bar:3128', 'http://host.name': 'foo.bar:4012'}``
-
-    :param raise_exception: if `True` then raise exception if smth will go wrong
-
-    :param http2: whether to use HTTP2 (default: True)
-
-    :param use_fallback: use a fallback method
-    :type raise_exception: boolean
     """
 
     def __init__(
@@ -86,9 +58,11 @@ class AiohttpTranslator:
         timeout: typing.Union[int, float] = 60.0,
         use_fallback: bool = False,
     ) -> None:
-        """Initiating the client with basic params and such.
+        """
+        Initiating the client with basic params and such.
 
-        Document the rest later"""
+        Document the rest later
+        """
 
         self.loop = loop
         self.raise_exception = raise_exception

@@ -17,7 +17,7 @@ copies or substantial portions of the Software.
 import typing
 from collections import OrderedDict
 
-from models import Detected, Translated
+from .models import Detected, Translated
 
 
 class Cache:
