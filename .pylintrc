@@ -1,0 +1,5 @@
+[MASTER]
+disable=
+    W0702, # bare-except
+    W0703, # broad-except
+    W0212, # access-protected
