@@ -23,12 +23,21 @@ class Base:
     Base class for response objects such as Translated and Detected
     """
 
-    def __init__(self, response: typing.Union[Response, ClientResponse] = None):
+    __slots__ = ("_response")
+
+    def __init__(self, response: typing.Union[Response, ClientResponse] = None) -> None:
+        """
+        Base class for basically all objects
+        """
         self._response = response
 
 
 class TranslatedPart:
-    """Translated parts"""
+    """
+    Translated parts
+    """
+
+    __slots__ = ("text", "candidates")
 
     def __init__(self, text: str, candidates: typing.List[str]) -> None:
         """
@@ -48,7 +57,8 @@ class TranslatedPart:
 
 
 class Translated(Base):
-    """Translate result object
+    """
+    Translate result object
 
     :param src: source language (default: auto)
     :param dest: destination language (default: en)
@@ -56,6 +66,8 @@ class Translated(Base):
     :param text: translated text
     :param pronunciation: pronunciation
     """
+
+    __slots__ = ("src", "dest", "origin", "text", "pronunciation", "extra_data", "parts")
 
     def __init__(
         self,
@@ -67,7 +79,10 @@ class Translated(Base):
         parts: typing.List[TranslatedPart],
         extra_data=None,
         **kwargs,
-    ):
+    ) -> None:
+        """
+        Init for translated object
+        """
         super().__init__(**kwargs)
         self.src = src
         self.dest = dest
@@ -77,13 +92,13 @@ class Translated(Base):
         self.parts = parts
         self.extra_data = extra_data
 
-    def __str__(self):
+    def __str__(self) -> str:
         return self.__unicode__()
 
-    def __unicode__(self):
+    def __unicode__(self) -> str:
         return f"Translated(src={self.src}, dest={self.dest}, text={self.text}, pronunciation={self.pronunciation}, extra_data={repr(self.extra_data)[:10]}...)"
 
-    def __dict__(self):
+    def __dict__(self) -> dict:
         return {
             "src": self.src,
             "dest": self.dest,
@@ -96,20 +111,25 @@ class Translated(Base):
 
 
 class Detected(Base):
-    """Language detection result object
+    """
+    Language detection result object
 
     :param lang: detected language
     :param confidence: the confidence of detection result (0.00 to 1.00)
     """
 
+    __slots__ = ("lang", "confidence")
+
     def __init__(self, lang: str, confidence: float, **kwargs) -> None:
-        """Initiation for detected object"""
+        """
+        Init for detected object
+        """
         super().__init__(**kwargs)
         self.lang = lang
         self.confidence = confidence
 
-    def __str__(self):
+    def __str__(self) -> str:
         return self.__unicode__()
 
-    def __unicode__(self):
+    def __unicode__(self) -> str:
         return f"Detected(lang={self.lang}, confidence={self.confidence})"
