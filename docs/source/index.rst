@@ -7,6 +7,7 @@ Welcome to aiogtrans's documentation!
 ==========================================
 
 .. toctree::
+
 	:maxdepth: 2
 	:caption: Contents:
 
@@ -16,10 +17,3 @@ Welcome to aiogtrans's documentation!
 
 	You can check `googletrans <https://py-googletrans.rtfd.io>`__ for complete documentation. This library is 
 	more of less the same, instead though, use await in front of translate and detect methods.
-
-Indices and tables
-==================
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`

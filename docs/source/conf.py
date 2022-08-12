@@ -50,6 +50,7 @@ exclude_patterns = []
 # a list of builtin themes.
 
 import sphinx_rtd_theme
+import aiogtrans
 
 html_theme = "sphinx_rtd_theme"
 
