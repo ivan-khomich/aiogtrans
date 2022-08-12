@@ -59,9 +59,15 @@ class AiohttpTranslator:
         use_fallback: bool = False,
     ) -> None:
         """
-        Initiating the client with basic params and such.
+        Initiating the client with the given parameters.
 
-        Document the rest later
+        Loop is the asyncio event loop to use.
+        Session is the aiohttp client session to use.
+        ServiceUrls is the list of service urls to use.
+        UserAgent is the user agent to use.
+        RaiseException is whether to raise an exception when an error occurs.
+        Timeout is the timeout to use for the requests.
+        UseFallback is whether to use the fallback service urls if the main service urls fail.
         """
 
         self.loop = loop
@@ -80,13 +86,8 @@ class AiohttpTranslator:
                 "Referer": "https://translate.google.com",
             }
 
-            if timeout:
-                timeout = aiohttp.ClientTimeout(total=timeout)
-            else:
-                timeout = aiohttp.ClientTimeout(total=60.0)
-
             self.session = loop.run_until_complete(
-                self._create_session(loop, headers, timeout)
+                self._create_session(loop, headers, aiohttp.ClientTimeout(total=timeout))
             )
 
         else:
@@ -98,14 +99,18 @@ class AiohttpTranslator:
         headers: dict,
         timeout: aiohttp.ClientTimeout,
     ) -> aiohttp.ClientSession:
-        """Internal method to create an aiohttp client session to use for requests"""
+        """
+        Internal method to create an aiohttp client session to use for requests
+        """
         session = await aiohttp.ClientSession(
             loop=loop, headers=headers, timeout=timeout
         )
         return session
 
     async def _build_rpc_request(self, text: str, dest: str, src: str) -> str:
-        """Build the rpc request"""
+        """
+        Build the rpc request
+        """
         trans_info = await self.loop.run_in_executor(
             None,
             functools.partial(
@@ -132,7 +137,9 @@ class AiohttpTranslator:
         return rpc
 
     def _pick_service_url(self) -> str:
-        """Pick a service url randomly"""
+        """
+        Pick a service url
+        """
         if len(self.service_urls) == 1:
             return self.service_urls[0]
         return random.choice(self.service_urls)
@@ -140,7 +147,9 @@ class AiohttpTranslator:
     async def _translate(
         self, text: str, dest: str, src: str
     ) -> typing.Tuple[str, aiohttp.ClientResponse]:
-        """Translate method that actually requests info"""
+        """
+        Translate protected method
+        """
         url = urls.TRANSLATE_RPC.format(host=self._pick_service_url())
         data = {
             "f.req": await self._build_rpc_request(text, dest, src),
@@ -153,17 +162,19 @@ class AiohttpTranslator:
             "soc-device": 1,
             "rt": "c",
         }
-        r = await self.session.post(url, params=params, data=data)
+        request = await self.session.post(url, params=params, data=data)
 
-        if r.status != 200 and self.raise_exception:
+        if request.status != 200 and self.raise_exception:
             raise Exception(
-                f"""Unexpected status code "{r.status}" from {self.service_urls}"""
+                f"""Unexpected status code "{request.status}" from {self.service_urls}"""
             )
-        text = await r.text()
-        return text, r
+        text = await request.text()
+        return text, request
 
     async def _parse_extra_data(self, data: list) -> dict:
-        """Parsing extra data to be returned to the user"""
+        """
+        Parsing extra data to be returned to the user
+        """
         response_parts_name_mapping = {
             0: "translation",
             1: "all-translations",
@@ -190,7 +201,9 @@ class AiohttpTranslator:
     async def translate(
         self, text: str, dest: str = "en", src: str = "auto"
     ) -> Translated:
-        """Translate text"""
+        """
+        Translate text
+        """
         dest = dest.lower().split("_", 1)[0]
         src = src.lower().split("_", 1)[0]
 

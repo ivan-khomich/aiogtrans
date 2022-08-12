@@ -20,7 +20,6 @@ copies or substantial portions of the Software.
 """
 
 __all__ = (
-    "HttpXTranslator",
     "AiohttpTranslator",
     "LANGCODES",
     "LANGUAGES",
@@ -32,9 +31,6 @@ from aiogtrans.aiohttpclient import AiohttpTranslator
 
 # Constants
 from aiogtrans.constants import LANGCODES, LANGUAGES
-
-# Client
-from aiogtrans.httpxclient import HttpXTranslator
 
 # Models for typehinting
 from aiogtrans.models import Detected, Translated
