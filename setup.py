@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 import os.path
 
-from setuptools import setup, find_packages
+from setuptools import find_packages, setup
 
 
 def get_file(*paths):
@@ -29,11 +29,7 @@ def get_readme():
 
 
 def get_requirements():
-    requirements = [
-        "httpx<=0.23.0",
-        "setuptools==58.1.0",
-        "aiohttp<=3.8.1"
-    ]
+    requirements = ["httpx<=0.23.0", "setuptools==58.1.0", "aiohttp<=3.8.1"]
     return requirements
 
 

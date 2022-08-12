@@ -29,13 +29,13 @@ from aiogtrans import urls
 from aiogtrans.constants import (
     DEFAULT_CLIENT_SERVICE_URLS,
     DEFAULT_FALLBACK_SERVICE_URLS,
+    DEFAULT_RAISE_EXCEPTION,
     DEFAULT_USER_AGENT,
     LANGCODES,
     LANGUAGES,
     SPECIAL_CASES,
-    DEFAULT_RAISE_EXCEPTION
 )
-from aiogtrans.models import Translated, Detected, TranslatedPart
+from aiogtrans.models import Detected, Translated, TranslatedPart
 
 EXCLUDES = ("en", "ca", "fr")
 
@@ -88,7 +88,7 @@ class HttpXTranslator:
         use_fallback: bool = False,
     ) -> None:
         """Initiating the client with basic params and such.
-        
+
         Document the rest later"""
 
         self.client = httpx.AsyncClient(http2=http2)
@@ -116,19 +116,29 @@ class HttpXTranslator:
 
     async def _build_rpc_request(self, text: str, dest: str, src: str) -> str:
         """Build the rpc request"""
-        trans_info = await self.loop.run_in_executor(None, functools.partial(json.dumps, obj=[[text, src, dest, True], [None]], separators=(",", ":")))
-        rpc = await self.loop.run_in_executor(None, functools.partial(json.dumps, obj=[
-                [
+        trans_info = await self.loop.run_in_executor(
+            None,
+            functools.partial(
+                json.dumps, obj=[[text, src, dest, True], [None]], separators=(",", ":")
+            ),
+        )
+        rpc = await self.loop.run_in_executor(
+            None,
+            functools.partial(
+                json.dumps,
+                obj=[
                     [
-                        RPC_ID,
-                        trans_info,
-                        None,
-                        "generic",
-                    ],
-                ]
-            ],
-            separators=(",", ":")
-        ))
+                        [
+                            RPC_ID,
+                            trans_info,
+                            None,
+                            "generic",
+                        ],
+                    ]
+                ],
+                separators=(",", ":"),
+            ),
+        )
         return rpc
 
     def _pick_service_url(self) -> str:
@@ -137,7 +147,9 @@ class HttpXTranslator:
             return self.service_urls[0]
         return random.choice(self.service_urls)
 
-    async def _translate(self, text: str, dest: str, src: str) -> typing.Tuple[str, httpx.Response]:
+    async def _translate(
+        self, text: str, dest: str, src: str
+    ) -> typing.Tuple[str, httpx.Response]:
         """Translate method that actually requests info"""
         url = urls.TRANSLATE_RPC.format(host=self._pick_service_url())
         data = {
@@ -187,7 +199,9 @@ class HttpXTranslator:
 
         return extra
 
-    async def translate(self, text: str, dest: str = "en", src: str = "auto") -> Translated:
+    async def translate(
+        self, text: str, dest: str = "en", src: str = "auto"
+    ) -> Translated:
         """Translate text"""
         dest = dest.lower().split("_", 1)[0]
         src = src.lower().split("_", 1)[0]
@@ -302,4 +316,3 @@ class HttpXTranslator:
             response=translated._response,
         )
         return result
-

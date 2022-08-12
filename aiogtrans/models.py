@@ -12,9 +12,10 @@ The above copyright notice and this permission notice shall be included in all
 copies or substantial portions of the Software.
 """
 
-from httpx import Response
-from aiohttp import ClientResponse
 import typing
+
+from aiohttp import ClientResponse
+from httpx import Response
 
 
 class Base:
@@ -65,7 +66,7 @@ class Translated(Base):
         pronunciation: str,
         parts: typing.List[TranslatedPart],
         extra_data=None,
-        **kwargs
+        **kwargs,
     ):
         super().__init__(**kwargs)
         self.src = src

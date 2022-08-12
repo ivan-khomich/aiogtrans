@@ -14,25 +14,26 @@ The above copyright notice and this permission notice shall be included in all
 copies or substantial portions of the Software.
 """
 
-from collections import OrderedDict
-from models import Translated, Detected
 import typing
+from collections import OrderedDict
+
+from models import Detected, Translated
 
 
 class Cache:
     """
     LRU based cache to store api calls, 2 will usually be created, one for translations, and one for detections, respectively
     """
-    
+
     def __init__(self, capacity: int = 1000) -> None:
         """Cache Init
-        
+
         Parameters
         ----------
         capacity: int
             The amount of items to be stored in the cache
             Default 1,000
-            
+
         Returns
         -------
         None"""
@@ -59,18 +60,18 @@ class Cache:
 
     def add(self, key: str, value: typing.Union[Translated, Detected]) -> None:
         """Add a key and value to the cache
-        
+
         Parameters
         ----------
         key: str
             Keyword/words whatever
         value: Translated, Detected
             The object to store
-        
+
         Returns
         -------
         None"""
         self.cache[key] = value
         self.cache.move_to_end(key)
         if len(self.cache) > self.capacity:
-            self.cache.popitem(last = False)
+            self.cache.popitem(last=False)

@@ -28,13 +28,13 @@ from aiogtrans import urls
 from aiogtrans.constants import (
     DEFAULT_CLIENT_SERVICE_URLS,
     DEFAULT_FALLBACK_SERVICE_URLS,
+    DEFAULT_RAISE_EXCEPTION,
     DEFAULT_USER_AGENT,
     LANGCODES,
     LANGUAGES,
     SPECIAL_CASES,
-    DEFAULT_RAISE_EXCEPTION
 )
-from aiogtrans.models import Translated, Detected, TranslatedPart
+from aiogtrans.models import Detected, Translated, TranslatedPart
 
 EXCLUDES = ("en", "ca", "fr")
 
@@ -87,7 +87,7 @@ class AiohttpTranslator:
         use_fallback: bool = False,
     ) -> None:
         """Initiating the client with basic params and such.
-        
+
         Document the rest later"""
 
         self.loop = loop
@@ -105,42 +105,56 @@ class AiohttpTranslator:
                 "User-Agent": user_agent,
                 "Referer": "https://translate.google.com",
             }
-        
+
             if timeout:
                 timeout = aiohttp.ClientTimeout(total=timeout)
             else:
                 timeout = aiohttp.ClientTimeout(total=60.0)
 
-            self.session = loop.run_until_complete(self._create_session(loop, headers, timeout))
-        
+            self.session = loop.run_until_complete(
+                self._create_session(loop, headers, timeout)
+            )
+
         else:
             self.session = session
 
-    async def _create_session(self, loop: asyncio.AbstractEventLoop, headers: dict, timeout: aiohttp.ClientTimeout) -> aiohttp.ClientSession:
-        """Internal method to create an aiohttp client session to use for requests
-        """
+    async def _create_session(
+        self,
+        loop: asyncio.AbstractEventLoop,
+        headers: dict,
+        timeout: aiohttp.ClientTimeout,
+    ) -> aiohttp.ClientSession:
+        """Internal method to create an aiohttp client session to use for requests"""
         session = await aiohttp.ClientSession(
-            loop=loop,
-            headers=headers,
-            timeout=timeout
+            loop=loop, headers=headers, timeout=timeout
         )
         return session
 
     async def _build_rpc_request(self, text: str, dest: str, src: str) -> str:
         """Build the rpc request"""
-        trans_info = await self.loop.run_in_executor(None, functools.partial(json.dumps, obj=[[text, src, dest, True], [None]], separators=(",", ":")))
-        rpc = await self.loop.run_in_executor(None, functools.partial(json.dumps, obj=[
-                [
+        trans_info = await self.loop.run_in_executor(
+            None,
+            functools.partial(
+                json.dumps, obj=[[text, src, dest, True], [None]], separators=(",", ":")
+            ),
+        )
+        rpc = await self.loop.run_in_executor(
+            None,
+            functools.partial(
+                json.dumps,
+                obj=[
                     [
-                        RPC_ID,
-                        trans_info,
-                        None,
-                        "generic",
-                    ],
-                ]
-            ],
-            separators=(",", ":")
-        ))
+                        [
+                            RPC_ID,
+                            trans_info,
+                            None,
+                            "generic",
+                        ],
+                    ]
+                ],
+                separators=(",", ":"),
+            ),
+        )
         return rpc
 
     def _pick_service_url(self) -> str:
@@ -149,7 +163,9 @@ class AiohttpTranslator:
             return self.service_urls[0]
         return random.choice(self.service_urls)
 
-    async def _translate(self, text: str, dest: str, src: str) -> typing.Tuple[str, aiohttp.ClientResponse]:
+    async def _translate(
+        self, text: str, dest: str, src: str
+    ) -> typing.Tuple[str, aiohttp.ClientResponse]:
         """Translate method that actually requests info"""
         url = urls.TRANSLATE_RPC.format(host=self._pick_service_url())
         data = {
@@ -165,7 +181,7 @@ class AiohttpTranslator:
         }
         r = await self.session.post(url, params=params, data=data)
 
-        if r.status != 200 and self.raise_Exception:
+        if r.status != 200 and self.raise_exception:
             raise Exception(
                 f"""Unexpected status code "{r.status}" from {self.service_urls}"""
             )
@@ -197,7 +213,9 @@ class AiohttpTranslator:
 
         return extra
 
-    async def translate(self, text: str, dest: str = "en", src: str = "auto") -> Translated:
+    async def translate(
+        self, text: str, dest: str = "en", src: str = "auto"
+    ) -> Translated:
         """Translate text"""
         dest = dest.lower().split("_", 1)[0]
         src = src.lower().split("_", 1)[0]
