@@ -28,9 +28,5 @@ __all__ = (
 )
 
 from aiogtrans.aiohttpclient import AiohttpTranslator
-
-# Constants
 from aiogtrans.constants import LANGCODES, LANGUAGES
-
-# Models for typehinting
 from aiogtrans.models import Detected, Translated
