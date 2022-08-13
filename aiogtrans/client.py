@@ -2,7 +2,7 @@
 """
 A Translation module.
 
-You can translate text using aiohttp in this module.
+You can translate text using httpx in this module.
 
 Copyright (c) 2022 Ben Z
 
@@ -17,12 +17,11 @@ The above copyright notice and this permission notice shall be included in all
 copies or substantial portions of the Software.
 """
 import asyncio
-import functools
 import json
 import random
 import typing
 
-import aiohttp
+import httpx
 
 from aiogtrans import urls
 from aiogtrans.constants import (
@@ -41,7 +40,7 @@ EXCLUDES = ("en", "ca", "fr")
 RPC_ID = "MkEWBc"
 
 
-class AiohttpTranslator:
+class Translator:
     """
     Google Translate Ajax API Translator class
 
@@ -50,19 +49,19 @@ class AiohttpTranslator:
 
     def __init__(
         self,
-        loop: asyncio.AbstractEventLoop = asyncio.get_event_loop(),
-        session: aiohttp.ClientSession = None,
+        loop: asyncio.AbstractEventLoop = asyncio.new_event_loop(),
+        _aclient: httpx.AsyncClient = None,
         service_urls: typing.Union[list, tuple] = DEFAULT_CLIENT_SERVICE_URLS,
         user_agent: str = DEFAULT_USER_AGENT,
         raise_exception: bool = DEFAULT_RAISE_EXCEPTION,
-        timeout: typing.Union[int, float] = 60.0,
+        timeout: typing.Union[int, float] = 10.0,
         use_fallback: bool = False,
     ) -> None:
         """
         Initiating the client with the given parameters.
 
         Loop is the asyncio event loop to use.
-        Session is the aiohttp client session to use.
+        the client
         ServiceUrls is the list of service urls to use.
         UserAgent is the user agent to use.
         RaiseException is whether to raise an exception when an error occurs.
@@ -80,61 +79,50 @@ class AiohttpTranslator:
             self.service_urls = service_urls
             self.client_type = "tw-ob"
 
-        if not session:
+        if not _aclient:
             headers = {
                 "User-Agent": user_agent,
                 "Referer": "https://translate.google.com",
             }
 
-            self.session = loop.run_until_complete(
-                self._create_session(loop, headers, aiohttp.ClientTimeout(total=timeout))
+            self._aclient = httpx.AsyncClient(
+                headers=headers, timeout=timeout
             )
 
         else:
-            self.session = session
+            self._aclient = _aclient
 
-    async def _create_session(
-        self,
-        loop: asyncio.AbstractEventLoop,
-        headers: dict,
-        timeout: aiohttp.ClientTimeout,
-    ) -> aiohttp.ClientSession:
+    async def close(self) -> None:
         """
-        Internal method to create an aiohttp client session to use for requests
+        Close the client
         """
-        session = await aiohttp.ClientSession(
-            loop=loop, headers=headers, timeout=timeout
-        )
-        return session
+        if self._aclient:
+            await self._aclient.aclose()
+
+    async def __aenter__(self) -> "Translator":
+        """
+        Enter the context
+        """
+        return self
+
+    async def __aexit__(self, exc_type, exc_val, exc_tb) -> None:
+        """
+        Exit the context
+        """
+        await self.close()
 
     async def _build_rpc_request(self, text: str, dest: str, src: str) -> str:
         """
         Build the rpc request
         """
-        trans_info = await self.loop.run_in_executor(
-            None,
-            functools.partial(
-                json.dumps, obj=[[text, src, dest, True], [None]], separators=(",", ":")
-            ),
-        )
-        rpc = await self.loop.run_in_executor(
-            None,
-            functools.partial(
-                json.dumps,
-                obj=[
-                    [
-                        [
-                            RPC_ID,
-                            trans_info,
-                            None,
-                            "generic",
-                        ],
-                    ]
-                ],
-                separators=(",", ":"),
-            ),
-        )
-        return rpc
+        return json.dumps([[
+            [
+                RPC_ID,
+                json.dumps([[text, src, dest, True],[None]], separators=(',', ':')),
+                None,
+                'generic',
+            ],
+        ]], separators=(',', ':'))
 
     def _pick_service_url(self) -> str:
         """
@@ -146,7 +134,7 @@ class AiohttpTranslator:
 
     async def _translate(
         self, text: str, dest: str, src: str
-    ) -> typing.Tuple[str, aiohttp.ClientResponse]:
+    ) -> typing.Tuple[str, httpx.Response]:
         """
         Translate protected method
         """
@@ -162,14 +150,12 @@ class AiohttpTranslator:
             "soc-device": 1,
             "rt": "c",
         }
-        request = await self.session.post(url, params=params, data=data)
-
-        if request.status != 200 and self.raise_exception:
+        request = await self._aclient.post(url, params=params, data=data)
+        if request.status_code != 200 and self.raise_exception:
             raise Exception(
-                f"""Unexpected status code "{request.status}" from {self.service_urls}"""
+                f"""Unexpected status code "{request.status_code}" from {self.service_urls}"""
             )
-        text = await request.text()
-        return text, request
+        return request.text, request
 
     async def _parse_extra_data(self, data: list) -> dict:
         """
@@ -248,8 +234,10 @@ class AiohttpTranslator:
             if square_bracket_counts[0] == square_bracket_counts[1]:
                 break
 
-        data = await self.loop.run_in_executor(None, json.loads, resp)
-        parsed = await self.loop.run_in_executor(None, json.loads, data[0][2])
+        # data = await self.loop.run_in_executor(None, json.loads, resp)
+        # parsed = await self.loop.run_in_executor(None, json.loads, data[0][2])
+        data = json.loads(resp)
+        parsed = json.loads(data[0][2])
 
         should_spacing = parsed[1][0][0][3]
         translated_parts = list(
