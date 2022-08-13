@@ -20,13 +20,13 @@ copies or substantial portions of the Software.
 """
 
 __all__ = (
-    "AiohttpTranslator",
+    "Translator",
     "LANGCODES",
     "LANGUAGES",
     "Translated",
     "Detected",
 )
 
-from aiogtrans.aiohttpclient import AiohttpTranslator
+from aiogtrans.client import Translator
 from aiogtrans.constants import LANGCODES, LANGUAGES
 from aiogtrans.models import Detected, Translated

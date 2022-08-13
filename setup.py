@@ -29,7 +29,7 @@ def get_readme():
 
 
 def get_requirements():
-    requirements = ["httpx<=0.23.0", "setuptools==58.1.0", "aiohttp<=3.8.1"]
+    requirements = ["httpx<=0.23.0", "setuptools==58.1.0"]
     return requirements
 
 

@@ -1,4 +1,4 @@
-AiohttpTranslator
-=================
+Translator
+==========
 
-.. automodule:: aiogtrans.AiohttpTranslator
+.. automodule:: aiogtrans.Translator
