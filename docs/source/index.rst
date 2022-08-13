@@ -11,6 +11,13 @@ Welcome to aiogtrans's documentation!
 	:maxdepth: 2
 	:caption: Contents:
 
+.. toctree::
+    :caption: Api Reference
+    :maxdepth: 0
+    :hidden:
+
+    httpx
+
 .. note::
 
 	As of this time aiogtrans is still being rewritten. No documentation will be provided.
