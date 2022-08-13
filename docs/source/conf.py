@@ -48,8 +48,6 @@ exclude_patterns = []
 
 import sphinx_rtd_theme
 
-import aiogtrans
-
 html_theme = "sphinx_rtd_theme"
 
 # Add any paths that contain custom static files (such as style sheets) here,

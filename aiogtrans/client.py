@@ -85,9 +85,7 @@ class Translator:
                 "Referer": "https://translate.google.com",
             }
 
-            self._aclient = httpx.AsyncClient(
-                headers=headers, timeout=timeout
-            )
+            self._aclient = httpx.AsyncClient(headers=headers, timeout=timeout)
 
         else:
             self._aclient = _aclient
@@ -115,14 +113,21 @@ class Translator:
         """
         Build the rpc request
         """
-        return json.dumps([[
+        return json.dumps(
             [
-                RPC_ID,
-                json.dumps([[text, src, dest, True],[None]], separators=(',', ':')),
-                None,
-                'generic',
+                [
+                    [
+                        RPC_ID,
+                        json.dumps(
+                            [[text, src, dest, True], [None]], separators=(",", ":")
+                        ),
+                        None,
+                        "generic",
+                    ],
+                ]
             ],
-        ]], separators=(',', ':'))
+            separators=(",", ":"),
+        )
 
     def _pick_service_url(self) -> str:
         """

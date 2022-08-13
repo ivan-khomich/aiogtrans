@@ -23,7 +23,7 @@ class Base:
     Base class for response objects such as Translated and Detected
     """
 
-    __slots__ = ("_response")
+    __slots__ = "_response"
 
     def __init__(self, response: typing.Union[Response, ClientResponse] = None) -> None:
         """
@@ -67,7 +67,15 @@ class Translated(Base):
     :param pronunciation: pronunciation
     """
 
-    __slots__ = ("src", "dest", "origin", "text", "pronunciation", "extra_data", "parts")
+    __slots__ = (
+        "src",
+        "dest",
+        "origin",
+        "text",
+        "pronunciation",
+        "extra_data",
+        "parts",
+    )
 
     def __init__(
         self,
