@@ -242,8 +242,12 @@ class Translator:
 
         # data = await self.loop.run_in_executor(None, json.loads, resp)
         # parsed = await self.loop.run_in_executor(None, json.loads, data[0][2])
-        data = json.loads(resp)
-        parsed = json.loads(data[0][2])
+        try : 
+            data = json.loads(resp)
+            parsed = json.loads(data[0][2])
+        except Exception as e:
+            raise Exception(f"Error occurred while loading data: {e} \n Response : {response}")
+        
 
         should_spacing = parsed[1][0][0][3]
         translated_parts = list(
