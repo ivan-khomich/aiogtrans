@@ -160,8 +160,8 @@ class Translator:
             raise Exception(
                 f"""Unexpected status code "{request.status_code}" from {self.service_urls}"""
             )
-        text = await r.text
-        return text, r
+        text =  request.text
+        return text, request
 
     async def _parse_extra_data(self, data: list) -> dict:
         """
@@ -242,8 +242,12 @@ class Translator:
 
         # data = await self.loop.run_in_executor(None, json.loads, resp)
         # parsed = await self.loop.run_in_executor(None, json.loads, data[0][2])
-        data = json.loads(resp)
-        parsed = json.loads(data[0][2])
+        try : 
+            data = json.loads(resp)
+            parsed = json.loads(data[0][2])
+        except Exception as e:
+            raise Exception(f"Error occurred while loading data: {e} \n Response : {response}")
+        
 
         should_spacing = parsed[1][0][0][3]
         translated_parts = list(
