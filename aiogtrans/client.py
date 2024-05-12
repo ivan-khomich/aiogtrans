@@ -156,9 +156,10 @@ class Translator:
             "rt": "c",
         }
         request = await self._aclient.post(url, params=params, data=data)
-        if request.status_code != 200 and self.raise_exception:
+        status = request.status_code if hasattr(request, "status_code") else request.status
+        if status != 200 and self.raise_exception:
             raise Exception(
-                f"""Unexpected status code "{request.status_code}" from {self.service_urls}"""
+                f"""Unexpected status code "{status}" from {self.service_urls}"""
             )
         text = request.text
         return text, request
