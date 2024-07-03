@@ -35,15 +35,15 @@ def get_requirements():
 
 def install():
     setup(
-        name="aiogtrans",
+        name="aiogtrans-proxy",
         version=get_version(),
         description=get_description(),
         long_description=get_readme(),
         long_description_content_type="text/markdown",
         license="MIT",
-        author="Ben Z",
-        author_email="bleg3ndary@gmail.com",
-        url="https://github.com/Leg3ndary/aiogtrans",
+        author="ivanxo",
+        author_email="ivan.khomich@gmail.com",
+        url="https://github.com/ivan-khomich/aiogtrans",
         classifiers=[
             "Development Status :: 5 - Production/Stable",
             "Intended Audience :: Education",
