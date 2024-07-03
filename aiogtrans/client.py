@@ -21,6 +21,7 @@ import json
 import random
 import typing
 
+import os
 import httpx
 
 from aiogtrans import urls
@@ -75,10 +76,17 @@ class Translator:
                 "User-Agent": user_agent,
                 "Referer": "https://translate.google.com",
             }
-            proxies = {
-                "http://": os.getenv('HTTP_PROXY'),
-                "https://": os.getenv('HTTPS_PROXY')
-            }
+
+            # Настройка прокси
+            proxies = None
+            http_proxy = os.getenv('HTTP_PROXY')
+            https_proxy = os.getenv('HTTPS_PROXY')
+            if http_proxy or https_proxy:
+                proxies = {
+                    "http://": http_proxy,
+                    "https://": http_proxy if https_proxy is None else https_proxy,
+                }
+
             self._aclient = httpx.AsyncClient(headers=headers, timeout=timeout, proxies=proxies)
         else:
             self._aclient = _aclient
