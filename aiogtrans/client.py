@@ -59,16 +59,7 @@ class Translator:
     ) -> None:
         """
         Initiating the client with the given parameters.
-
-        Loop is the asyncio event loop to use.
-        the client
-        ServiceUrls is the list of service urls to use.
-        UserAgent is the user agent to use.
-        RaiseException is whether to raise an exception when an error occurs.
-        Timeout is the timeout to use for the requests.
-        UseFallback is whether to use the fallback service urls if the main service urls fail.
         """
-
         self.loop = loop
         self.raise_exception = raise_exception
 
@@ -84,9 +75,11 @@ class Translator:
                 "User-Agent": user_agent,
                 "Referer": "https://translate.google.com",
             }
-
-            self._aclient = httpx.AsyncClient(headers=headers, timeout=timeout)
-
+            proxies = {
+                "http://": os.getenv('HTTP_PROXY'),
+                "https://": os.getenv('HTTPS_PROXY')
+            }
+            self._aclient = httpx.AsyncClient(headers=headers, timeout=timeout, proxies=proxies)
         else:
             self._aclient = _aclient
 
