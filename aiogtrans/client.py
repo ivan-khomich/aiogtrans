@@ -230,7 +230,7 @@ class Translator:
 
             is_in_string = False
             for index, char in enumerate(line):
-                if char == '"' and line[max(0, index - 1)] != "\\":
+                if char == '"' and (index == 0 or line[index - 1] != "\\"):
                     is_in_string = not is_in_string
                 if not is_in_string:
                     if char == "[":
@@ -242,8 +242,6 @@ class Translator:
             if square_bracket_counts[0] == square_bracket_counts[1]:
                 break
 
-        # data = await self.loop.run_in_executor(None, json.loads, resp)
-        # parsed = await self.loop.run_in_executor(None, json.loads, data[0][2])
         try:
             data = json.loads(resp)
             parsed = json.loads(data[0][2])
@@ -252,13 +250,30 @@ class Translator:
                 f"Error occurred while loading data: {e} \n Response : {response}"
             )
 
-        should_spacing = parsed[1][0][0][3]
-        translated_parts = list(
-            map(
-                lambda part: TranslatedPart(part[0], part[1] if len(part) >= 2 else []),
-                parsed[1][0][0][5],
+        # Получение списка переводов
+        translations = parsed[1][0][0][5]
+
+        # Фильтрация переводов с мужским родом
+        masculine_translations = [
+            part for part in translations if len(part) > 2 and part[2] == "(masculine)"
+        ]
+
+        if masculine_translations:
+            selected_part = masculine_translations[0]
+        elif translations:
+            selected_part = translations[0]
+        else:
+            raise Exception("No translation entries found.")
+
+        # Создание объекта TranslatedPart с выбранным переводом
+        translated_parts = [
+            TranslatedPart(
+                selected_part[0],
+                selected_part[1] if len(selected_part) >= 2 else []
             )
-        )
+        ]
+
+        should_spacing = parsed[1][0][0][3]
         translated = (" " if should_spacing else "").join(
             map(lambda part: part.text, translated_parts)
         )
@@ -285,7 +300,7 @@ class Translator:
 
         pronunciation = None
         try:
-            pronunciation = parsed[1][0][0][1]
+            pronunciation = selected_part[1] if len(selected_part) > 1 else None
         except:
             pass
 
@@ -306,6 +321,7 @@ class Translator:
             response=response,
         )
         return result
+
 
     async def detect(self, text: str) -> Detected:
         """
