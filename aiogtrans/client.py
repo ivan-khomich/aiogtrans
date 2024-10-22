@@ -263,11 +263,21 @@ class Translator:
                 f"Error occurred while loading data: {e} \n Response : {response}"
             )
 
-        # Получение списка переводов
+        # Попытка извлечь переводы из старого формата
+        translations = None
+        should_spacing = False
         try:
+            # Старый путь
             translations = parsed[1][0][0][5]
-        except (IndexError, TypeError) as e:
-            raise Exception("Failed to extract translations from the response.") from e
+            should_spacing = parsed[1][0][0][3]
+        except (IndexError, TypeError):
+            try:
+                # Новый путь
+                translations = parsed[7][0]
+                # Предполагаем, что should_spacing находится в parsed[6][3]
+                should_spacing = parsed[6][3] if len(parsed) > 6 and isinstance(parsed[6], list) and len(parsed[6]) > 3 else False
+            except (IndexError, TypeError):
+                raise Exception("Failed to extract translations from the response.")
 
         if not isinstance(translations, list):
             raise Exception("Translations format is invalid.")
@@ -303,7 +313,6 @@ class Translator:
             )
         ]
 
-        should_spacing = parsed[1][0][0][3]
         translated = (" " if should_spacing else "").join(
             map(lambda part: part.text, translated_parts)
         )
