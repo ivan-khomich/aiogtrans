@@ -259,36 +259,54 @@ class Translator:
             data = json.loads(resp)
             parsed = json.loads(data[0][2])
         except Exception as e:
-            print(f"Error occurred while loading data: {e} \n Response : {response.text}")
             raise Exception(
-                f"Error occurred while loading data: {e} \n Response : {response.text}"
+                f"Error occurred while loading data: {e} \n Response : {response}"
             )
 
-        # Обработка информации о гендере, если она присутствует
+        # Получение списка переводов
         try:
-            # parsed[1][0][0][5] должно содержать список переводов
-            translation_entries = parsed[1][0][0][5]
-            if translation_entries is None:
-                raise ValueError("No translation entries found.")
+            translations = parsed[1][0][0][5]
+        except (IndexError, TypeError) as e:
+            raise Exception("Failed to extract translations from the response.") from e
 
-            # Проверяем, содержит ли первый элемент информацию о гендере
-            first_entry = translation_entries[0]
-            if isinstance(first_entry, list) and len(first_entry) >= 4 and isinstance(first_entry[3], str):
-                # Предполагаем, что элемент содержит гендерную информацию
-                gender_info = first_entry[3]
-                print(f"Detected gender information: {gender_info}")
-                # Извлекаем только первую гендерную запись
-                first_gender = gender_info.split(",")[0].strip()
-                print(f"Using first gender information: {first_gender}")
-                translated = first_entry[0]  # Получаем переведённый текст
-            else:
-                # Если гендерной информации нет, обрабатываем как обычно
-                translated = translation_entries[0][0]
-        except Exception as e:
-            print(f"Failed to process translation entries: {e}")
-            translated = "Translation Failed"
+        if not isinstance(translations, list):
+            raise Exception("Translations format is invalid.")
 
-        print(f"Translated text: {translated}")
+        # Фильтрация переводов с мужским родом
+        masculine_translations = [
+            part for part in translations
+            if isinstance(part, list) and len(part) > 2 and part[2] == "(masculine)"
+        ]
+
+        if masculine_translations:
+            selected_part = masculine_translations[0]
+        elif translations:
+            selected_part = translations[0]
+        else:
+            raise Exception("No translation entries found.")
+
+        # Проверка структуры выбранного перевода
+        if not isinstance(selected_part, list) or len(selected_part) < 1:
+            raise Exception("Selected translation part is invalid.")
+
+        # Извлечение текста перевода
+        translated_text = selected_part[0] if selected_part[0] else "Translation Failed"
+
+        # Извлечение произношения, если доступно
+        pronunciation = selected_part[1] if len(selected_part) > 1 and selected_part[1] else None
+
+        # Создание объекта TranslatedPart
+        translated_parts = [
+            TranslatedPart(
+                text=translated_text,
+                synonyms=[]  # Можно расширить, если есть необходимость
+            )
+        ]
+
+        should_spacing = parsed[1][0][0][3]
+        translated = (" " if should_spacing else "").join(
+            map(lambda part: part.text, translated_parts)
+        )
 
         if src == "auto":
             try:
@@ -310,15 +328,9 @@ class Translator:
         except:
             pass
 
-        pronunciation = None
-        try:
-            pronunciation = parsed[1][0][0][1]
-        except:
-            pass
-
         extra_data = {
             "confidence": confidence,
-            "parts": [],  # Упрощаем для отладки
+            "parts": translated_parts,
             "origin_pronunciation": origin_pronunciation,
             "parsed": parsed,
         }
@@ -328,11 +340,12 @@ class Translator:
             origin=origin,
             text=translated,
             pronunciation=pronunciation,
-            parts=[],  # Упрощаем для отладки
+            parts=translated_parts,
             extra_data=extra_data,
-            response=response.text,
+            response=response,
         )
         return result
+
 
     async def detect(self, text: str) -> Detected:
         """
