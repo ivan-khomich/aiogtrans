@@ -84,7 +84,7 @@ class Translator:
             if http_proxy or https_proxy:
                 proxies = {
                     "http://": http_proxy,
-                    "https://": http_proxy if https_proxy is None else https_proxy,
+                    "https://": https_proxy if https_proxy else http_proxy,
                 }
 
             self._aclient = httpx.AsyncClient(headers=headers, timeout=timeout, proxies=proxies)
@@ -252,4 +252,96 @@ class Translator:
                         square_bracket_counts[1] += 1
 
             resp += line
-         
+            if square_bracket_counts[0] == square_bracket_counts[1]:
+                break
+
+        try:
+            data = json.loads(resp)
+            parsed = json.loads(data[0][2])
+        except Exception as e:
+            print(f"Error occurred while loading data: {e} \n Response : {response.text}")
+            raise Exception(
+                f"Error occurred while loading data: {e} \n Response : {response.text}"
+            )
+
+        # Обработка информации о гендере, если она присутствует
+        try:
+            # parsed[1][0][0][5] должно содержать список переводов
+            translation_entries = parsed[1][0][0][5]
+            if translation_entries is None:
+                raise ValueError("No translation entries found.")
+
+            # Проверяем, содержит ли первый элемент информацию о гендере
+            first_entry = translation_entries[0]
+            if isinstance(first_entry, list) and len(first_entry) >= 4 and isinstance(first_entry[3], str):
+                # Предполагаем, что элемент содержит гендерную информацию
+                gender_info = first_entry[3]
+                print(f"Detected gender information: {gender_info}")
+                # Извлекаем только первую гендерную запись
+                first_gender = gender_info.split(",")[0].strip()
+                print(f"Using first gender information: {first_gender}")
+                translated = first_entry[0]  # Получаем переведённый текст
+            else:
+                # Если гендерной информации нет, обрабатываем как обычно
+                translated = translation_entries[0][0]
+        except Exception as e:
+            print(f"Failed to process translation entries: {e}")
+            translated = "Translation Failed"
+
+        print(f"Translated text: {translated}")
+
+        if src == "auto":
+            try:
+                src = parsed[2]
+            except:
+                pass
+        if src == "auto":
+            try:
+                src = parsed[0][2]
+            except:
+                pass
+
+        # currently not available
+        confidence = None
+
+        origin_pronunciation = None
+        try:
+            origin_pronunciation = parsed[0][0]
+        except:
+            pass
+
+        pronunciation = None
+        try:
+            pronunciation = parsed[1][0][0][1]
+        except:
+            pass
+
+        extra_data = {
+            "confidence": confidence,
+            "parts": [],  # Упрощаем для отладки
+            "origin_pronunciation": origin_pronunciation,
+            "parsed": parsed,
+        }
+        result = Translated(
+            src=src,
+            dest=dest,
+            origin=origin,
+            text=translated,
+            pronunciation=pronunciation,
+            parts=[],  # Упрощаем для отладки
+            extra_data=extra_data,
+            response=response.text,
+        )
+        return result
+
+    async def detect(self, text: str) -> Detected:
+        """
+        Detect a language
+        """
+        translated = await self.translate(text, src="auto", dest="en")
+        result = Detected(
+            lang=translated.src,
+            confidence=translated.extra_data.get("confidence", None),
+            response=translated._response,
+        )
+        return result
