@@ -264,31 +264,35 @@ class Translator:
                 f"Error occurred while loading data: {e} \n Response : {response.text}"
             )
 
-        # Обработка информации о гендере, если она присутствует
-        try:
-            # parsed[1][0][0][5] должно содержать список переводов
-            translation_entries = parsed[1][0][0][5]
-            if translation_entries is None:
-                raise ValueError("No translation entries found.")
+        # Получение списка переводов
+        translations = parsed[1][0][0][5]
 
-            # Проверяем, содержит ли первый элемент информацию о гендере
-            first_entry = translation_entries[0]
-            if isinstance(first_entry, list) and len(first_entry) >= 4 and isinstance(first_entry[3], str):
-                # Предполагаем, что элемент содержит гендерную информацию
-                gender_info = first_entry[3]
-                print(f"Detected gender information: {gender_info}")
-                # Извлекаем только первую гендерную запись
-                first_gender = gender_info.split(",")[0].strip()
-                print(f"Using first gender information: {first_gender}")
-                translated = first_entry[0]  # Получаем переведённый текст
-            else:
-                # Если гендерной информации нет, обрабатываем как обычно
-                translated = translation_entries[0][0]
-        except Exception as e:
-            print(f"Failed to process translation entries: {e}")
-            translated = "Translation Failed"
+        # Фильтрация переводов с мужским родом
+        masculine_translations = [
+            part for part in translations if len(part) > 2 and part[2] == "(masculine)"
+        ]
 
-        print(f"Translated text: {translated}")
+        if masculine_translations:
+            selected_part = masculine_translations[0]
+        elif translations:
+            selected_part = translations[0]
+        else:
+            raise Exception("No translation entries found.")
+
+        # Создание объекта TranslatedPart с выбранным переводом
+        translated_parts = [
+            TranslatedPart(
+                selected_part[0],
+                selected_part[1] if len(selected_part) >= 2 else []
+            )
+        ]
+
+        should_spacing = parsed[1][0][0][3]
+        translated = (" " if should_spacing else "").join(
+            map(lambda part: part.text, translated_parts)
+        )
+
+
 
         if src == "auto":
             try:
@@ -312,7 +316,7 @@ class Translator:
 
         pronunciation = None
         try:
-            pronunciation = parsed[1][0][0][1]
+            pronunciation = selected_part[1] if len(selected_part) > 1 else None
         except:
             pass
 
@@ -333,6 +337,7 @@ class Translator:
             response=response.text,
         )
         return result
+
 
     async def detect(self, text: str) -> Detected:
         """
