@@ -156,7 +156,16 @@ class Translator:
             "soc-device": 1,
             "rt": "c",
         }
+
+        print("Request URL:", url)
+        print("Request parameters:", params)
+        print("Request data:", data)
+
         request = await self._aclient.post(url, params=params, data=data)
+
+        print("Response status code:", request.status_code)
+        print("Response text:", request.text)
+
         status = request.status_code if hasattr(request, "status_code") else request.status
         if status != 200 and self.raise_exception:
             raise Exception(
