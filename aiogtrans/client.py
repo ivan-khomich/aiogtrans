@@ -292,9 +292,11 @@ class Translator:
         pronunciation = selected_part[1] if len(selected_part) > 1 and selected_part[1] else None
 
         # Создание объекта TranslatedPart без аргумента synonyms
+        # Передаём 'candidates' как пустой список
         translated_parts = [
             TranslatedPart(
-                text=translated_text
+                text=translated_text,
+                candidates=[]  # Передаём пустой список, если не нужны кандидаты
             )
         ]
 
