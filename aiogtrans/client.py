@@ -328,6 +328,12 @@ class Translator:
         except:
             pass
 
+        pronunciation = None
+        try:
+            pronunciation = parsed[1][0][0][1]
+        except:
+            pass
+
         extra_data = {
             "confidence": confidence,
             "parts": translated_parts,
