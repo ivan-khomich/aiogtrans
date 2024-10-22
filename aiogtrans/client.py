@@ -239,7 +239,7 @@ class Translator:
 
             is_in_string = False
             for index, char in enumerate(line):
-                if char == '"' and line[max(0, index - 1)] != "\\":
+                if char == '"' and (index == 0 or line[index - 1] != "\\"):
                     is_in_string = not is_in_string
                 if not is_in_string:
                     if char == "[":
@@ -251,8 +251,6 @@ class Translator:
             if square_bracket_counts[0] == square_bracket_counts[1]:
                 break
 
-        # data = await self.loop.run_in_executor(None, json.loads, resp)
-        # parsed = await self.loop.run_in_executor(None, json.loads, data[0][2])
         try:
             data = json.loads(resp)
             parsed = json.loads(data[0][2])
@@ -261,16 +259,41 @@ class Translator:
                 f"Error occurred while loading data: {e} \n Response : {response}"
             )
 
-        should_spacing = parsed[1][0][0][3]
-        translated_parts = list(
-            map(
-                lambda part: TranslatedPart(part[0], part[1] if len(part) >= 2 else []),
-                parsed[1][0][0][5],
-            )
-        )
-        translated = (" " if should_spacing else "").join(
-            map(lambda part: part.text, translated_parts)
-        )
+        # Обработка информации о гендере, если она присутствует
+        try:
+            # parsed[1][0][0][5] должно содержать список переводов
+            translation_entries = parsed[1][0][0][5]
+            if translation_entries is None:
+                raise ValueError("No translation entries found.")
+
+            # Проверяем, содержит ли первый элемент информацию о гендере
+            first_entry = translation_entries[0]
+            if isinstance(first_entry, list) and len(first_entry) >= 4 and isinstance(first_entry[3], str):
+                # Предполагаем, что элемент содержит гендерную информацию
+                gender_info = first_entry[3]
+                logger.debug(f"Detected gender information: {gender_info}")
+                # Извлекаем только первую гендерную запись
+                first_gender = gender_info.split(",")[0].strip()
+                logger.debug(f"Using first gender information: {first_gender}")
+                translated_parts = list(
+                    map(
+                        lambda part: TranslatedPart(part[0], part[1] if len(part) >= 2 else []),
+                        [translation_entries[0]],  # Берём только первый элемент с гендером
+                    )
+                )
+            else:
+                # Если гендерной информации нет, обрабатываем как обычно
+                translated_parts = list(
+                    map(
+                        lambda part: TranslatedPart(part[0], part[1] if len(part) >= 2 else []),
+                        translation_entries,
+                    )
+                )
+        except Exception as e:
+            logger.error(f"Failed to process translation entries: {e}")
+            translated_parts = []
+
+        translated = " ".join([part.text for part in translated_parts if part.text])
 
         if src == "auto":
             try:
