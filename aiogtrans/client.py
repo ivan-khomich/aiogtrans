@@ -1,26 +1,7 @@
-# -*- coding: utf-8 -*-
-"""
-A Translation module.
-
-You can translate text using httpx in this module.
-
-Copyright (c) 2022 Ben Z
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-"""
 import asyncio
 import json
 import random
 import typing
-
 import os
 import httpx
 
@@ -37,7 +18,6 @@ from aiogtrans.constants import (
 from aiogtrans.models import Detected, Translated, TranslatedPart
 
 EXCLUDES = ("en", "ca", "fr")
-
 RPC_ID = "MkEWBc"
 
 
@@ -84,7 +64,7 @@ class Translator:
             if http_proxy or https_proxy:
                 proxies = {
                     "http://": http_proxy,
-                    "https://": https_proxy if https_proxy else http_proxy,
+                    "https://": http_proxy if https_proxy is None else https_proxy,
                 }
 
             self._aclient = httpx.AsyncClient(headers=headers, timeout=timeout, proxies=proxies)
@@ -156,20 +136,7 @@ class Translator:
             "soc-device": 1,
             "rt": "c",
         }
-
-        print("Request URL:", url)
-        print("Request parameters:", params)
-        print("Request data:", data)
-
-        try:
-            request = await self._aclient.post(url, params=params, data=data)
-        except Exception as e:
-            print(f"HTTP Request failed: {e}")
-            raise e
-
-        print("Response status code:", request.status_code)
-        print("Response text:", request.text)
-
+        request = await self._aclient.post(url, params=params, data=data)
         status = request.status_code if hasattr(request, "status_code") else request.status
         if status != 200 and self.raise_exception:
             raise Exception(
@@ -204,6 +171,22 @@ class Translator:
             )
 
         return extra
+
+    def _find_translation_list(self, data):
+        """
+        Recursively search for the translation list in the parsed data
+        """
+        if isinstance(data, list):
+            for item in data:
+                if isinstance(item, list):
+                    # Check if this is a list of translations
+                    if all(isinstance(subitem, list) and len(subitem) > 0 and isinstance(subitem[0], str) for subitem in item):
+                        return item
+                    # Recurse into the item
+                    result = self._find_translation_list(item)
+                    if result:
+                        return result
+        return None
 
     async def translate(
         self, text: str, dest: str = "en", src: str = "auto"
@@ -258,28 +241,24 @@ class Translator:
         try:
             data = json.loads(resp)
             parsed = json.loads(data[0][2])
+            print(f"Parsed response: {parsed}")  # Отладочный вывод
         except Exception as e:
+            print(f"Error occurred while loading data: {e}")
+            print(f"Response: {response}")
             raise Exception(
                 f"Error occurred while loading data: {e} \n Response : {response}"
             )
 
-        # Попытка извлечь переводы из старого формата
-        translations = None
-        should_spacing = False
-        try:
-            # Старый путь
-            translations = parsed[1][0][0][5]
-            should_spacing = parsed[1][0][0][3]
-        except (IndexError, TypeError):
-            try:
-                # Новый путь
-                translations = parsed[7][0]
-                # Предполагаем, что should_spacing находится в parsed[6][3]
-                should_spacing = parsed[6][3] if len(parsed) > 6 and isinstance(parsed[6], list) and len(parsed[6]) > 3 else False
-            except (IndexError, TypeError):
-                raise Exception("Failed to extract translations from the response.")
+        # Рекурсивный поиск переводов
+        translations = self._find_translation_list(parsed)
+        if translations is None:
+            print("Failed to extract translations from the response.")  # Отладочный вывод
+            raise Exception("Failed to extract translations from the response.")
+        
+        print(f"Found translations: {translations}")  # Отладочный вывод
 
         if not isinstance(translations, list):
+            print("Translations format is invalid.")  # Отладочный вывод
             raise Exception("Translations format is invalid.")
 
         # Фильтрация переводов с мужским родом
@@ -288,15 +267,21 @@ class Translator:
             if isinstance(part, list) and len(part) > 2 and part[2] == "(masculine)"
         ]
 
+        print(f"Masculine translations: {masculine_translations}")  # Отладочный вывод
+
         if masculine_translations:
             selected_part = masculine_translations[0]
+            print(f"Selected masculine translation: {selected_part}")  # Отладочный вывод
         elif translations:
             selected_part = translations[0]
+            print(f"Selected first available translation: {selected_part}")  # Отладочный вывод
         else:
+            print("No translation entries found.")  # Отладочный вывод
             raise Exception("No translation entries found.")
 
         # Проверка структуры выбранного перевода
         if not isinstance(selected_part, list) or len(selected_part) < 1:
+            print("Selected translation part is invalid.")  # Отладочный вывод
             raise Exception("Selected translation part is invalid.")
 
         # Извлечение текста перевода
@@ -312,6 +297,14 @@ class Translator:
                 synonyms=[]  # Можно расширить, если есть необходимость
             )
         ]
+
+        # Определение should_spacing
+        should_spacing = False  # По умолчанию
+        try:
+            # Поиск should_spacing в parsed, если возможно
+            should_spacing = parsed[6][3] if len(parsed) > 6 and isinstance(parsed[6], list) and len(parsed[6]) > 3 else False
+        except (IndexError, TypeError):
+            print("Could not find should_spacing, defaulting to False")  # Отладочный вывод
 
         translated = (" " if should_spacing else "").join(
             map(lambda part: part.text, translated_parts)
@@ -354,7 +347,6 @@ class Translator:
             response=response,
         )
         return result
-
 
     async def detect(self, text: str) -> Detected:
         """
