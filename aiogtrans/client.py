@@ -84,7 +84,7 @@ class Translator:
             if http_proxy or https_proxy:
                 proxies = {
                     "http://": http_proxy,
-                    "https://": http_proxy if https_proxy is None else https_proxy,
+                    "https://": https_proxy if https_proxy else http_proxy,
                 }
 
             self._aclient = httpx.AsyncClient(headers=headers, timeout=timeout, proxies=proxies)
@@ -156,7 +156,20 @@ class Translator:
             "soc-device": 1,
             "rt": "c",
         }
-        request = await self._aclient.post(url, params=params, data=data)
+
+        print("Request URL:", url)
+        print("Request parameters:", params)
+        print("Request data:", data)
+
+        try:
+            request = await self._aclient.post(url, params=params, data=data)
+        except Exception as e:
+            print(f"HTTP Request failed: {e}")
+            raise e
+
+        print("Response status code:", request.status_code)
+        print("Response text:", request.text)
+
         status = request.status_code if hasattr(request, "status_code") else request.status
         if status != 200 and self.raise_exception:
             raise Exception(
@@ -246,8 +259,9 @@ class Translator:
             data = json.loads(resp)
             parsed = json.loads(data[0][2])
         except Exception as e:
+            print(f"Error occurred while loading data: {e} \n Response : {response.text}")
             raise Exception(
-                f"Error occurred while loading data: {e} \n Response : {response}"
+                f"Error occurred while loading data: {e} \n Response : {response.text}"
             )
 
         # Получение списка переводов
@@ -278,6 +292,8 @@ class Translator:
             map(lambda part: part.text, translated_parts)
         )
 
+
+
         if src == "auto":
             try:
                 src = parsed[2]
@@ -306,7 +322,7 @@ class Translator:
 
         extra_data = {
             "confidence": confidence,
-            "parts": translated_parts,
+            "parts": [],  # Упрощаем для отладки
             "origin_pronunciation": origin_pronunciation,
             "parsed": parsed,
         }
@@ -316,9 +332,9 @@ class Translator:
             origin=origin,
             text=translated,
             pronunciation=pronunciation,
-            parts=translated_parts,
+            parts=[],  # Упрощаем для отладки
             extra_data=extra_data,
-            response=response,
+            response=response.text,
         )
         return result
 
