@@ -64,7 +64,7 @@ class Translator:
             if http_proxy or https_proxy:
                 proxies = {
                     "http://": http_proxy,
-                    "https://": http_proxy if https_proxy is None else https_proxy,
+                    "https://": https_proxy if https_proxy is not None else http_proxy,
                 }
 
             self._aclient = httpx.AsyncClient(headers=headers, timeout=timeout, proxies=proxies)
@@ -276,6 +276,7 @@ class Translator:
             selected_part = translations[0]
             print(f"Selected first available translation: {selected_part}")  # Отладочный вывод
         else:
+            # Нет переводов, хотя должно быть
             print("No translation entries found.")  # Отладочный вывод
             raise Exception("No translation entries found.")
 
@@ -290,11 +291,10 @@ class Translator:
         # Извлечение произношения, если доступно
         pronunciation = selected_part[1] if len(selected_part) > 1 and selected_part[1] else None
 
-        # Создание объекта TranslatedPart
+        # Создание объекта TranslatedPart без аргумента synonyms
         translated_parts = [
             TranslatedPart(
-                text=translated_text,
-                synonyms=[]  # Можно расширить, если есть необходимость
+                text=translated_text
             )
         ]
 
