@@ -161,7 +161,11 @@ class Translator:
         print("Request parameters:", params)
         print("Request data:", data)
 
-        request = await self._aclient.post(url, params=params, data=data)
+        try:
+            request = await self._aclient.post(url, params=params, data=data)
+        except Exception as e:
+            print(f"HTTP Request failed: {e}")
+            raise e
 
         print("Response status code:", request.status_code)
         print("Response text:", request.text)
@@ -248,105 +252,4 @@ class Translator:
                         square_bracket_counts[1] += 1
 
             resp += line
-            if square_bracket_counts[0] == square_bracket_counts[1]:
-                break
-
-        try:
-            data = json.loads(resp)
-            parsed = json.loads(data[0][2])
-        except Exception as e:
-            raise Exception(
-                f"Error occurred while loading data: {e} \n Response : {response}"
-            )
-
-        # Обработка информации о гендере, если она присутствует
-        try:
-            # parsed[1][0][0][5] должно содержать список переводов
-            translation_entries = parsed[1][0][0][5]
-            if translation_entries is None:
-                raise ValueError("No translation entries found.")
-
-            # Проверяем, содержит ли первый элемент информацию о гендере
-            first_entry = translation_entries[0]
-            if isinstance(first_entry, list) and len(first_entry) >= 4 and isinstance(first_entry[3], str):
-                # Предполагаем, что элемент содержит гендерную информацию
-                gender_info = first_entry[3]
-                logger.debug(f"Detected gender information: {gender_info}")
-                # Извлекаем только первую гендерную запись
-                first_gender = gender_info.split(",")[0].strip()
-                logger.debug(f"Using first gender information: {first_gender}")
-                translated_parts = list(
-                    map(
-                        lambda part: TranslatedPart(part[0], part[1] if len(part) >= 2 else []),
-                        [translation_entries[0]],  # Берём только первый элемент с гендером
-                    )
-                )
-            else:
-                # Если гендерной информации нет, обрабатываем как обычно
-                translated_parts = list(
-                    map(
-                        lambda part: TranslatedPart(part[0], part[1] if len(part) >= 2 else []),
-                        translation_entries,
-                    )
-                )
-        except Exception as e:
-            logger.error(f"Failed to process translation entries: {e}")
-            translated_parts = []
-
-        translated = " ".join([part.text for part in translated_parts if part.text])
-
-        if src == "auto":
-            try:
-                src = parsed[2]
-            except:
-                pass
-        if src == "auto":
-            try:
-                src = parsed[0][2]
-            except:
-                pass
-
-        # currently not available
-        confidence = None
-
-        origin_pronunciation = None
-        try:
-            origin_pronunciation = parsed[0][0]
-        except:
-            pass
-
-        pronunciation = None
-        try:
-            pronunciation = parsed[1][0][0][1]
-        except:
-            pass
-
-        extra_data = {
-            "confidence": confidence,
-            "parts": translated_parts,
-            "origin_pronunciation": origin_pronunciation,
-            "parsed": parsed,
-        }
-        result = Translated(
-            src=src,
-            dest=dest,
-            origin=origin,
-            text=translated,
-            pronunciation=pronunciation,
-            parts=translated_parts,
-            extra_data=extra_data,
-            response=response,
-        )
-        return result
-
-    async def detect(self, text: str) -> Detected:
-        """
-        Detect a language
-        """
-        translated = await self.translate(text, src="auto", dest="en")
-        result = Detected(
-            lang=translated.src,
-            confidence=translated.extra_data.get("confidence", None),
-            response=translated._response,
-        )
-        return result
+         
